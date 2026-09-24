@@ -2,6 +2,8 @@
 
 A generative, code-rendered music video with word-synced karaoke typography. Every frame is a deterministic function of song time, so the live preview in the browser and the offline 1080p60 (or 4K60) export are identical.
 
+**Watch it in 4K on YouTube:** https://www.youtube.com/watch?v=ghag4XVhbnw
+
 The concept, style bible and plate-by-plate treatment are in [`docs/TREATMENT.md`](docs/TREATMENT.md). The engine and scene API are documented in [`docs/ENGINE.md`](docs/ENGINE.md).
 
 ## Layout
