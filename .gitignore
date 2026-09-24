@@ -1,0 +1,14 @@
+.DS_Store
+node_modules/
+.vite/
+
+# renders
+out/
+
+# analysis: Python env, model weights, stems and intermediates (regenerable, large)
+analysis/.venv/
+analysis/.cache/
+analysis/__pycache__/
+analysis/stems/
+analysis/work/
+analysis/qa/

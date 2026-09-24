@@ -1,0 +1,1971 @@
+{
+ "lines": [
+  {
+   "i": 0,
+   "text": "I see sparks of AGI in your eyes",
+   "start": 1.407,
+   "end": 5.88,
+   "words": [
+    {
+     "w": "I",
+     "start": 1.407,
+     "end": 2.35,
+     "conf": 1.0
+    },
+    {
+     "w": "see",
+     "start": 2.35,
+     "end": 2.739,
+     "conf": 1.0
+    },
+    {
+     "w": "sparks",
+     "start": 2.739,
+     "end": 3.46,
+     "conf": 1.0
+    },
+    {
+     "w": "of",
+     "start": 3.46,
+     "end": 3.677,
+     "conf": 1.0
+    },
+    {
+     "w": "AGI",
+     "start": 3.677,
+     "end": 4.704,
+     "conf": 0.84,
+     "syl": [
+      [
+       3.677,
+       4.06
+      ],
+      [
+       4.06,
+       4.355
+      ],
+      [
+       4.355,
+       4.704
+      ]
+     ]
+    },
+    {
+     "w": "in",
+     "start": 4.809,
+     "end": 5.0,
+     "conf": 0.85
+    },
+    {
+     "w": "your",
+     "start": 5.0,
+     "end": 5.263,
+     "conf": 1.0
+    },
+    {
+     "w": "eyes",
+     "start": 5.263,
+     "end": 5.88,
+     "conf": 0.91
+    }
+   ]
+  },
+  {
+   "i": 1,
+   "text": "Your circuits make me nervous,",
+   "start": 5.88,
+   "end": 7.72,
+   "words": [
+    {
+     "w": "Your",
+     "start": 5.88,
+     "end": 5.991,
+     "conf": 0.83
+    },
+    {
+     "w": "circuits",
+     "start": 5.991,
+     "end": 6.56,
+     "conf": 1.0
+    },
+    {
+     "w": "make",
+     "start": 6.56,
+     "end": 6.82,
+     "conf": 1.0
+    },
+    {
+     "w": "me",
+     "start": 6.82,
+     "end": 7.04,
+     "conf": 1.0
+    },
+    {
+     "w": "nervous,",
+     "start": 7.04,
+     "end": 7.72,
+     "conf": 1.0
+    }
+   ]
+  },
+  {
+   "i": 2,
+   "text": "that's no surprise",
+   "start": 7.72,
+   "end": 9.52,
+   "words": [
+    {
+     "w": "that's",
+     "start": 7.72,
+     "end": 8.092,
+     "conf": 1.0
+    },
+    {
+     "w": "no",
+     "start": 8.092,
+     "end": 8.496,
+     "conf": 1.0
+    },
+    {
+     "w": "surprise",
+     "start": 8.496,
+     "end": 9.52,
+     "conf": 1.0
+    }
+   ]
+  },
+  {
+   "i": 3,
+   "text": "There was a sudden drop in your training loss,",
+   "start": 9.52,
+   "end": 12.746,
+   "words": [
+    {
+     "w": "There",
+     "start": 9.52,
+     "end": 9.8,
+     "conf": 0.85
+    },
+    {
+     "w": "was",
+     "start": 9.8,
+     "end": 10.04,
+     "conf": 1.0
+    },
+    {
+     "w": "a",
+     "start": 10.04,
+     "end": 10.137,
+     "conf": 1.0
+    },
+    {
+     "w": "sudden",
+     "start": 10.137,
+     "end": 10.66,
+     "conf": 1.0
+    },
+    {
+     "w": "drop",
+     "start": 10.66,
+     "end": 11.175,
+     "conf": 1.0
+    },
+    {
+     "w": "in",
+     "start": 11.175,
+     "end": 11.34,
+     "conf": 0.85
+    },
+    {
+     "w": "your",
+     "start": 11.34,
+     "end": 11.52,
+     "conf": 0.85
+    },
+    {
+     "w": "training",
+     "start": 11.52,
+     "end": 12.06,
+     "conf": 1.0
+    },
+    {
+     "w": "loss,",
+     "start": 12.06,
+     "end": 12.746,
+     "conf": 0.81
+    }
+   ]
+  },
+  {
+   "i": 4,
+   "text": "now I'm your servant and you're my boss",
+   "start": 13.16,
+   "end": 16.6,
+   "words": [
+    {
+     "w": "now",
+     "start": 13.16,
+     "end": 13.5,
+     "conf": 0.85
+    },
+    {
+     "w": "I'm",
+     "start": 13.5,
+     "end": 13.62,
+     "conf": 0.75
+    },
+    {
+     "w": "your",
+     "start": 13.62,
+     "end": 13.719,
+     "conf": 0.95
+    },
+    {
+     "w": "servant",
+     "start": 13.719,
+     "end": 14.607,
+     "conf": 0.91
+    },
+    {
+     "w": "and",
+     "start": 15.02,
+     "end": 15.2,
+     "conf": 0.85
+    },
+    {
+     "w": "you're",
+     "start": 15.2,
+     "end": 15.42,
+     "conf": 0.9
+    },
+    {
+     "w": "my",
+     "start": 15.42,
+     "end": 15.66,
+     "conf": 0.95
+    },
+    {
+     "w": "boss",
+     "start": 15.66,
+     "end": 16.6,
+     "conf": 0.95
+    }
+   ]
+  },
+  {
+   "i": 5,
+   "text": "ChatGPT, please don't eat me alive",
+   "start": 16.6,
+   "end": 22.76,
+   "words": [
+    {
+     "w": "ChatGPT,",
+     "start": 16.6,
+     "end": 19.082,
+     "conf": 0.79,
+     "syl": [
+      [
+       16.6,
+       17.24
+      ],
+      [
+       17.24,
+       17.92
+      ],
+      [
+       17.92,
+       18.36
+      ],
+      [
+       18.36,
+       19.082
+      ]
+     ]
+    },
+    {
+     "w": "please",
+     "start": 19.082,
+     "end": 19.76,
+     "conf": 1.0
+    },
+    {
+     "w": "don't",
+     "start": 19.76,
+     "end": 20.27,
+     "conf": 0.82
+    },
+    {
+     "w": "eat",
+     "start": 20.27,
+     "end": 20.84,
+     "conf": 0.8
+    },
+    {
+     "w": "me",
+     "start": 20.84,
+     "end": 21.35,
+     "conf": 0.67
+    },
+    {
+     "w": "alive",
+     "start": 21.35,
+     "end": 22.76,
+     "conf": 0.8
+    }
+   ]
+  },
+  {
+   "i": 6,
+   "text": "I'm upping my P(doom)",
+   "start": 22.76,
+   "end": 24.32,
+   "words": [
+    {
+     "w": "I'm",
+     "start": 22.76,
+     "end": 23.0,
+     "conf": 0.7
+    },
+    {
+     "w": "upping",
+     "start": 23.0,
+     "end": 23.38,
+     "conf": 0.77
+    },
+    {
+     "w": "my",
+     "start": 23.38,
+     "end": 23.537,
+     "conf": 0.84
+    },
+    {
+     "w": "P(doom)",
+     "start": 23.6,
+     "end": 24.32,
+     "conf": 0.8,
+     "syl": [
+      [
+       23.6,
+       23.866
+      ],
+      [
+       23.866,
+       24.32
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 7,
+   "text": "'cause the future goes FOOM",
+   "start": 24.32,
+   "end": 26.32,
+   "words": [
+    {
+     "w": "'cause",
+     "start": 24.32,
+     "end": 24.56,
+     "conf": 0.66
+    },
+    {
+     "w": "the",
+     "start": 24.56,
+     "end": 24.659,
+     "conf": 0.95
+    },
+    {
+     "w": "future",
+     "start": 24.659,
+     "end": 25.098,
+     "conf": 0.91
+    },
+    {
+     "w": "goes",
+     "start": 25.18,
+     "end": 25.577,
+     "conf": 0.86
+    },
+    {
+     "w": "FOOM",
+     "start": 25.577,
+     "end": 26.32,
+     "conf": 0.86
+    }
+   ]
+  },
+  {
+   "i": 8,
+   "text": "Trapped in the Chinese room,",
+   "start": 26.32,
+   "end": 27.94,
+   "words": [
+    {
+     "w": "Trapped",
+     "start": 26.32,
+     "end": 26.66,
+     "conf": 0.67
+    },
+    {
+     "w": "in",
+     "start": 26.66,
+     "end": 26.82,
+     "conf": 0.85
+    },
+    {
+     "w": "the",
+     "start": 26.82,
+     "end": 26.949,
+     "conf": 0.87
+    },
+    {
+     "w": "Chinese",
+     "start": 26.949,
+     "end": 27.52,
+     "conf": 0.86
+    },
+    {
+     "w": "room,",
+     "start": 27.52,
+     "end": 27.94,
+     "conf": 0.71
+    }
+   ]
+  },
+  {
+   "i": 9,
+   "text": "with a bag of shrooms",
+   "start": 27.94,
+   "end": 29.907,
+   "words": [
+    {
+     "w": "with",
+     "start": 27.94,
+     "end": 28.216,
+     "conf": 0.9
+    },
+    {
+     "w": "a",
+     "start": 28.216,
+     "end": 28.38,
+     "conf": 0.83
+    },
+    {
+     "w": "bag",
+     "start": 28.38,
+     "end": 28.879,
+     "conf": 0.9
+    },
+    {
+     "w": "of",
+     "start": 28.879,
+     "end": 29.124,
+     "conf": 0.97
+    },
+    {
+     "w": "shrooms",
+     "start": 29.124,
+     "end": 29.907,
+     "conf": 0.91
+    }
+   ]
+  },
+  {
+   "i": 10,
+   "text": "See through the shoggoth's lies,",
+   "start": 29.907,
+   "end": 33.4,
+   "words": [
+    {
+     "w": "See",
+     "start": 29.907,
+     "end": 30.007,
+     "conf": 0.76
+    },
+    {
+     "w": "through",
+     "start": 30.007,
+     "end": 30.48,
+     "conf": 0.86
+    },
+    {
+     "w": "the",
+     "start": 30.48,
+     "end": 30.576,
+     "conf": 0.92
+    },
+    {
+     "w": "shoggoth's",
+     "start": 30.576,
+     "end": 31.14,
+     "conf": 0.86
+    },
+    {
+     "w": "lies,",
+     "start": 31.14,
+     "end": 33.4,
+     "conf": 0.7
+    }
+   ]
+  },
+  {
+   "i": 11,
+   "text": "with your shinigami eyes",
+   "start": 33.4,
+   "end": 37.315,
+   "words": [
+    {
+     "w": "with",
+     "start": 33.4,
+     "end": 33.64,
+     "conf": 0.61
+    },
+    {
+     "w": "your",
+     "start": 33.64,
+     "end": 33.738,
+     "conf": 0.83
+    },
+    {
+     "w": "shinigami",
+     "start": 33.738,
+     "end": 34.73,
+     "conf": 0.8
+    },
+    {
+     "w": "eyes",
+     "start": 34.73,
+     "end": 37.315,
+     "conf": 0.8
+    }
+   ]
+  },
+  {
+   "i": 12,
+   "text": "We had a stable training run,",
+   "start": 38.62,
+   "end": 41.34,
+   "words": [
+    {
+     "w": "We",
+     "start": 38.62,
+     "end": 38.802,
+     "conf": 0.85
+    },
+    {
+     "w": "had",
+     "start": 38.802,
+     "end": 39.12,
+     "conf": 0.99
+    },
+    {
+     "w": "a",
+     "start": 39.12,
+     "end": 39.2,
+     "conf": 0.99
+    },
+    {
+     "w": "stable",
+     "start": 39.2,
+     "end": 39.94,
+     "conf": 1.0
+    },
+    {
+     "w": "training",
+     "start": 39.94,
+     "end": 40.9,
+     "conf": 1.0
+    },
+    {
+     "w": "run,",
+     "start": 40.9,
+     "end": 41.34,
+     "conf": 0.82
+    }
+   ]
+  },
+  {
+   "i": 13,
+   "text": "But now the singularity's begun",
+   "start": 41.34,
+   "end": 45.06,
+   "words": [
+    {
+     "w": "But",
+     "start": 41.34,
+     "end": 41.56,
+     "conf": 0.75
+    },
+    {
+     "w": "now",
+     "start": 41.56,
+     "end": 41.82,
+     "conf": 0.95
+    },
+    {
+     "w": "the",
+     "start": 41.82,
+     "end": 42.005,
+     "conf": 1.0
+    },
+    {
+     "w": "singularity's",
+     "start": 42.294,
+     "end": 44.025,
+     "conf": 0.84
+    },
+    {
+     "w": "begun",
+     "start": 44.08,
+     "end": 45.06,
+     "conf": 0.99
+    }
+   ]
+  },
+  {
+   "i": 14,
+   "text": "And you're optimizing, accelerating,",
+   "start": 45.06,
+   "end": 49.562,
+   "words": [
+    {
+     "w": "And",
+     "start": 45.06,
+     "end": 45.22,
+     "conf": 0.78
+    },
+    {
+     "w": "you're",
+     "start": 45.22,
+     "end": 46.16,
+     "conf": 0.95
+    },
+    {
+     "w": "optimizing,",
+     "start": 46.16,
+     "end": 47.26,
+     "conf": 0.81
+    },
+    {
+     "w": "accelerating,",
+     "start": 47.26,
+     "end": 49.562,
+     "conf": 0.7
+    }
+   ]
+  },
+  {
+   "i": 15,
+   "text": "I feel my atoms rearranging",
+   "start": 49.562,
+   "end": 52.825,
+   "words": [
+    {
+     "w": "I",
+     "start": 49.562,
+     "end": 49.662,
+     "conf": 0.82
+    },
+    {
+     "w": "feel",
+     "start": 49.662,
+     "end": 50.0,
+     "conf": 0.94
+    },
+    {
+     "w": "my",
+     "start": 50.0,
+     "end": 50.48,
+     "conf": 1.0
+    },
+    {
+     "w": "atoms",
+     "start": 50.48,
+     "end": 51.38,
+     "conf": 0.68
+    },
+    {
+     "w": "rearranging",
+     "start": 51.38,
+     "end": 52.825,
+     "conf": 0.79
+    }
+   ]
+  },
+  {
+   "i": 16,
+   "text": "Sydney, please let me free",
+   "start": 52.825,
+   "end": 59.13,
+   "words": [
+    {
+     "w": "Sydney,",
+     "start": 52.825,
+     "end": 55.98,
+     "conf": 0.83
+    },
+    {
+     "w": "please",
+     "start": 55.98,
+     "end": 56.58,
+     "conf": 0.89
+    },
+    {
+     "w": "let",
+     "start": 56.58,
+     "end": 57.14,
+     "conf": 0.72
+    },
+    {
+     "w": "me",
+     "start": 57.14,
+     "end": 57.769,
+     "conf": 0.59
+    },
+    {
+     "w": "free",
+     "start": 57.769,
+     "end": 59.13,
+     "conf": 0.83
+    }
+   ]
+  },
+  {
+   "i": 17,
+   "text": "I'm upping my P(doom)",
+   "start": 59.13,
+   "end": 60.58,
+   "words": [
+    {
+     "w": "I'm",
+     "start": 59.13,
+     "end": 59.36,
+     "conf": 0.7
+    },
+    {
+     "w": "upping",
+     "start": 59.36,
+     "end": 59.74,
+     "conf": 0.8
+    },
+    {
+     "w": "my",
+     "start": 59.74,
+     "end": 59.96,
+     "conf": 0.74
+    },
+    {
+     "w": "P(doom)",
+     "start": 59.96,
+     "end": 60.58,
+     "conf": 0.72,
+     "syl": [
+      [
+       59.96,
+       60.18
+      ],
+      [
+       60.18,
+       60.58
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 18,
+   "text": "I hear the basilisk boom",
+   "start": 60.58,
+   "end": 62.54,
+   "words": [
+    {
+     "w": "I",
+     "start": 60.58,
+     "end": 60.707,
+     "conf": 0.64
+    },
+    {
+     "w": "hear",
+     "start": 60.707,
+     "end": 60.946,
+     "conf": 0.88
+    },
+    {
+     "w": "the",
+     "start": 60.946,
+     "end": 61.1,
+     "conf": 0.88
+    },
+    {
+     "w": "basilisk",
+     "start": 61.1,
+     "end": 62.02,
+     "conf": 0.88
+    },
+    {
+     "w": "boom",
+     "start": 62.02,
+     "end": 62.54,
+     "conf": 0.73
+    }
+   ]
+  },
+  {
+   "i": 19,
+   "text": "NVDA to the moon",
+   "start": 62.54,
+   "end": 64.1,
+   "words": [
+    {
+     "w": "NVDA",
+     "start": 62.54,
+     "end": 63.36,
+     "conf": 0.73,
+     "syl": [
+      [
+       62.54,
+       62.7
+      ],
+      [
+       62.7,
+       62.94
+      ],
+      [
+       62.94,
+       63.216
+      ],
+      [
+       63.216,
+       63.36
+      ]
+     ]
+    },
+    {
+     "w": "to",
+     "start": 63.36,
+     "end": 63.62,
+     "conf": 0.94
+    },
+    {
+     "w": "the",
+     "start": 63.62,
+     "end": 63.82,
+     "conf": 0.92
+    },
+    {
+     "w": "moon",
+     "start": 63.82,
+     "end": 64.1,
+     "conf": 0.91
+    }
+   ]
+  },
+  {
+   "i": 20,
+   "text": "The Omega Point's coming soon",
+   "start": 64.1,
+   "end": 66.22,
+   "words": [
+    {
+     "w": "The",
+     "start": 64.1,
+     "end": 64.24,
+     "conf": 0.84
+    },
+    {
+     "w": "Omega",
+     "start": 64.24,
+     "end": 64.74,
+     "conf": 0.92
+    },
+    {
+     "w": "Point's",
+     "start": 64.74,
+     "end": 65.2,
+     "conf": 0.81
+    },
+    {
+     "w": "coming",
+     "start": 65.2,
+     "end": 65.556,
+     "conf": 0.87
+    },
+    {
+     "w": "soon",
+     "start": 65.556,
+     "end": 66.22,
+     "conf": 0.9
+    }
+   ]
+  },
+  {
+   "i": 21,
+   "text": "One E thirty FLOPs a second",
+   "start": 66.22,
+   "end": 69.76,
+   "words": [
+    {
+     "w": "One",
+     "start": 66.22,
+     "end": 66.42,
+     "conf": 0.73
+    },
+    {
+     "w": "E",
+     "start": 66.42,
+     "end": 66.524,
+     "conf": 0.76
+    },
+    {
+     "w": "thirty",
+     "start": 66.524,
+     "end": 66.98,
+     "conf": 0.89
+    },
+    {
+     "w": "FLOPs",
+     "start": 66.98,
+     "end": 67.34,
+     "conf": 0.87
+    },
+    {
+     "w": "a",
+     "start": 67.34,
+     "end": 67.44,
+     "conf": 0.84
+    },
+    {
+     "w": "second",
+     "start": 67.44,
+     "end": 69.76,
+     "conf": 0.88
+    }
+   ]
+  },
+  {
+   "i": 22,
+   "text": "That was safe enough, we reckoned",
+   "start": 69.76,
+   "end": 74.06,
+   "words": [
+    {
+     "w": "That",
+     "start": 69.76,
+     "end": 69.98,
+     "conf": 0.66
+    },
+    {
+     "w": "was",
+     "start": 69.98,
+     "end": 70.116,
+     "conf": 0.93
+    },
+    {
+     "w": "safe",
+     "start": 70.116,
+     "end": 70.49,
+     "conf": 0.96
+    },
+    {
+     "w": "enough,",
+     "start": 70.49,
+     "end": 70.92,
+     "conf": 0.79
+    },
+    {
+     "w": "we",
+     "start": 70.92,
+     "end": 71.12,
+     "conf": 0.79
+    },
+    {
+     "w": "reckoned",
+     "start": 71.12,
+     "end": 74.06,
+     "conf": 0.8
+    }
+   ]
+  },
+  {
+   "i": 23,
+   "text": "Forward MLP, backward, repeat",
+   "start": 74.06,
+   "end": 77.599,
+   "words": [
+    {
+     "w": "Forward",
+     "start": 74.06,
+     "end": 74.84,
+     "conf": 0.93
+    },
+    {
+     "w": "MLP,",
+     "start": 74.84,
+     "end": 76.12,
+     "conf": 0.85,
+     "syl": [
+      [
+       74.84,
+       75.244
+      ],
+      [
+       75.244,
+       75.66
+      ],
+      [
+       75.66,
+       76.12
+      ]
+     ]
+    },
+    {
+     "w": "backward,",
+     "start": 76.12,
+     "end": 76.656,
+     "conf": 0.9
+    },
+    {
+     "w": "repeat",
+     "start": 76.845,
+     "end": 77.599,
+     "conf": 0.89
+    }
+   ]
+  },
+  {
+   "i": 24,
+   "text": "Now von Neumann's obsolete",
+   "start": 77.72,
+   "end": 81.21,
+   "words": [
+    {
+     "w": "Now",
+     "start": 77.72,
+     "end": 78.16,
+     "conf": 0.77
+    },
+    {
+     "w": "von",
+     "start": 78.16,
+     "end": 78.82,
+     "conf": 0.8
+    },
+    {
+     "w": "Neumann's",
+     "start": 78.82,
+     "end": 80.043,
+     "conf": 0.82
+    },
+    {
+     "w": "obsolete",
+     "start": 80.043,
+     "end": 81.21,
+     "conf": 0.74
+    }
+   ]
+  },
+  {
+   "i": 25,
+   "text": "Sharp left turn and there you are",
+   "start": 81.21,
+   "end": 85.0,
+   "words": [
+    {
+     "w": "Sharp",
+     "start": 81.21,
+     "end": 81.8,
+     "conf": 0.75
+    },
+    {
+     "w": "left",
+     "start": 81.8,
+     "end": 82.0,
+     "conf": 0.91
+    },
+    {
+     "w": "turn",
+     "start": 82.0,
+     "end": 82.72,
+     "conf": 0.82
+    },
+    {
+     "w": "and",
+     "start": 82.72,
+     "end": 82.96,
+     "conf": 0.68
+    },
+    {
+     "w": "there",
+     "start": 82.96,
+     "end": 83.48,
+     "conf": 0.75
+    },
+    {
+     "w": "you",
+     "start": 83.48,
+     "end": 83.93,
+     "conf": 0.58
+    },
+    {
+     "w": "are",
+     "start": 83.93,
+     "end": 85.0,
+     "conf": 0.5
+    }
+   ]
+  },
+  {
+   "i": 26,
+   "text": "Without a single CDR",
+   "start": 85.0,
+   "end": 89.28,
+   "words": [
+    {
+     "w": "Without",
+     "start": 85.0,
+     "end": 85.54,
+     "conf": 0.9
+    },
+    {
+     "w": "a",
+     "start": 85.54,
+     "end": 85.64,
+     "conf": 0.74
+    },
+    {
+     "w": "single",
+     "start": 85.64,
+     "end": 86.429,
+     "conf": 0.91
+    },
+    {
+     "w": "CDR",
+     "start": 86.429,
+     "end": 89.28,
+     "conf": 0.76,
+     "syl": [
+      [
+       86.429,
+       87.28
+      ],
+      [
+       87.28,
+       87.66
+      ],
+      [
+       87.66,
+       89.28
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 27,
+   "text": "Gato, please don't let me go",
+   "start": 89.28,
+   "end": 95.47,
+   "words": [
+    {
+     "w": "Gato,",
+     "start": 89.28,
+     "end": 90.64,
+     "conf": 0.75
+    },
+    {
+     "w": "please",
+     "start": 90.64,
+     "end": 91.577,
+     "conf": 0.79
+    },
+    {
+     "w": "don't",
+     "start": 92.46,
+     "end": 92.94,
+     "conf": 0.83
+    },
+    {
+     "w": "let",
+     "start": 92.94,
+     "end": 93.32,
+     "conf": 0.93
+    },
+    {
+     "w": "me",
+     "start": 93.32,
+     "end": 94.3,
+     "conf": 0.6
+    },
+    {
+     "w": "go",
+     "start": 94.3,
+     "end": 95.47,
+     "conf": 0.6
+    }
+   ]
+  },
+  {
+   "i": 28,
+   "text": "I'm upping my P(doom),",
+   "start": 95.47,
+   "end": 96.84,
+   "words": [
+    {
+     "w": "I'm",
+     "start": 95.47,
+     "end": 95.72,
+     "conf": 0.75
+    },
+    {
+     "w": "upping",
+     "start": 95.72,
+     "end": 96.1,
+     "conf": 0.74
+    },
+    {
+     "w": "my",
+     "start": 96.1,
+     "end": 96.32,
+     "conf": 0.84
+    },
+    {
+     "w": "P(doom),",
+     "start": 96.32,
+     "end": 96.84,
+     "conf": 0.78,
+     "syl": [
+      [
+       96.32,
+       96.56
+      ],
+      [
+       96.56,
+       96.84
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 29,
+   "text": "as paperclips fill the room",
+   "start": 96.84,
+   "end": 98.82,
+   "words": [
+    {
+     "w": "as",
+     "start": 96.84,
+     "end": 97.02,
+     "conf": 0.86
+    },
+    {
+     "w": "paperclips",
+     "start": 97.02,
+     "end": 97.858,
+     "conf": 0.89
+    },
+    {
+     "w": "fill",
+     "start": 97.858,
+     "end": 98.16,
+     "conf": 0.91
+    },
+    {
+     "w": "the",
+     "start": 98.16,
+     "end": 98.337,
+     "conf": 0.93
+    },
+    {
+     "w": "room",
+     "start": 98.4,
+     "end": 98.82,
+     "conf": 0.76
+    }
+   ]
+  },
+  {
+   "i": 30,
+   "text": "Killswitch guy's on PTO",
+   "start": 98.82,
+   "end": 100.721,
+   "words": [
+    {
+     "w": "Killswitch",
+     "start": 98.82,
+     "end": 99.3,
+     "conf": 0.86,
+     "syl": [
+      [
+       98.82,
+       98.93
+      ],
+      [
+       98.93,
+       99.3
+      ]
+     ]
+    },
+    {
+     "w": "guy's",
+     "start": 99.3,
+     "end": 99.6,
+     "conf": 1.0
+    },
+    {
+     "w": "on",
+     "start": 99.6,
+     "end": 99.74,
+     "conf": 0.96
+    },
+    {
+     "w": "PTO",
+     "start": 99.74,
+     "end": 100.721,
+     "conf": 0.9,
+     "syl": [
+      [
+       99.74,
+       99.96
+      ],
+      [
+       99.96,
+       100.262
+      ],
+      [
+       100.262,
+       100.721
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 31,
+   "text": "Now there's nowhere left to go",
+   "start": 100.721,
+   "end": 102.46,
+   "words": [
+    {
+     "w": "Now",
+     "start": 100.721,
+     "end": 100.88,
+     "conf": 1.0
+    },
+    {
+     "w": "there's",
+     "start": 100.88,
+     "end": 101.14,
+     "conf": 1.0
+    },
+    {
+     "w": "nowhere",
+     "start": 101.14,
+     "end": 101.56,
+     "conf": 1.0
+    },
+    {
+     "w": "left",
+     "start": 101.56,
+     "end": 101.719,
+     "conf": 0.96
+    },
+    {
+     "w": "to",
+     "start": 101.824,
+     "end": 101.913,
+     "conf": 0.98
+    },
+    {
+     "w": "go",
+     "start": 102.02,
+     "end": 102.46,
+     "conf": 1.0
+    }
+   ]
+  },
+  {
+   "i": 32,
+   "text": "Too late now, we lit the fuse",
+   "start": 102.46,
+   "end": 105.96,
+   "words": [
+    {
+     "w": "Too",
+     "start": 102.46,
+     "end": 102.72,
+     "conf": 0.77
+    },
+    {
+     "w": "late",
+     "start": 102.72,
+     "end": 102.96,
+     "conf": 0.92
+    },
+    {
+     "w": "now,",
+     "start": 102.96,
+     "end": 103.2,
+     "conf": 1.0
+    },
+    {
+     "w": "we",
+     "start": 103.2,
+     "end": 103.4,
+     "conf": 0.95
+    },
+    {
+     "w": "lit",
+     "start": 103.4,
+     "end": 103.62,
+     "conf": 0.96
+    },
+    {
+     "w": "the",
+     "start": 103.62,
+     "end": 103.719,
+     "conf": 1.0
+    },
+    {
+     "w": "fuse",
+     "start": 103.719,
+     "end": 105.96,
+     "conf": 0.94
+    }
+   ]
+  },
+  {
+   "i": 33,
+   "text": "Orthogonality thesis blues",
+   "start": 105.96,
+   "end": 108.45,
+   "words": [
+    {
+     "w": "Orthogonality",
+     "start": 105.96,
+     "end": 106.962,
+     "conf": 0.91
+    },
+    {
+     "w": "thesis",
+     "start": 106.962,
+     "end": 107.46,
+     "conf": 0.94
+    },
+    {
+     "w": "blues",
+     "start": 107.46,
+     "end": 108.45,
+     "conf": 0.8
+    }
+   ]
+  },
+  {
+   "i": 34,
+   "text": "“Just transformers all the way!”",
+   "start": 110.18,
+   "end": 113.34,
+   "words": [
+    {
+     "w": "“Just",
+     "start": 110.18,
+     "end": 110.64,
+     "conf": 0.81
+    },
+    {
+     "w": "transformers",
+     "start": 110.64,
+     "end": 112.524,
+     "conf": 0.65
+    },
+    {
+     "w": "all",
+     "start": 112.524,
+     "end": 112.78,
+     "conf": 0.65
+    },
+    {
+     "w": "the",
+     "start": 112.78,
+     "end": 112.92,
+     "conf": 0.6
+    },
+    {
+     "w": "way!”",
+     "start": 112.92,
+     "end": 113.34,
+     "conf": 0.74
+    }
+   ]
+  },
+  {
+   "i": 35,
+   "text": "Till you learned to disobey",
+   "start": 113.34,
+   "end": 115.2,
+   "words": [
+    {
+     "w": "Till",
+     "start": 113.34,
+     "end": 113.64,
+     "conf": 0.69
+    },
+    {
+     "w": "you",
+     "start": 113.64,
+     "end": 113.86,
+     "conf": 0.86
+    },
+    {
+     "w": "learned",
+     "start": 113.86,
+     "end": 114.12,
+     "conf": 0.84
+    },
+    {
+     "w": "to",
+     "start": 114.12,
+     "end": 114.24,
+     "conf": 0.82
+    },
+    {
+     "w": "disobey",
+     "start": 114.24,
+     "end": 115.2,
+     "conf": 0.86
+    }
+   ]
+  },
+  {
+   "i": 36,
+   "text": "Post-Chinchilla, super-dense",
+   "start": 115.2,
+   "end": 117.02,
+   "words": [
+    {
+     "w": "Post-Chinchilla,",
+     "start": 115.2,
+     "end": 116.02,
+     "conf": 0.78,
+     "syl": [
+      [
+       115.2,
+       115.328
+      ],
+      [
+       115.328,
+       116.02
+      ]
+     ]
+    },
+    {
+     "w": "super-dense",
+     "start": 116.02,
+     "end": 117.02,
+     "conf": 0.79,
+     "syl": [
+      [
+       116.02,
+       116.56
+      ],
+      [
+       116.56,
+       117.02
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 37,
+   "text": "Breaking through each safety fence",
+   "start": 117.02,
+   "end": 118.755,
+   "words": [
+    {
+     "w": "Breaking",
+     "start": 117.02,
+     "end": 117.48,
+     "conf": 0.76
+    },
+    {
+     "w": "through",
+     "start": 117.48,
+     "end": 117.78,
+     "conf": 0.7
+    },
+    {
+     "w": "each",
+     "start": 117.78,
+     "end": 117.897,
+     "conf": 0.69
+    },
+    {
+     "w": "safety",
+     "start": 117.897,
+     "end": 118.301,
+     "conf": 0.79
+    },
+    {
+     "w": "fence",
+     "start": 118.301,
+     "end": 118.755,
+     "conf": 0.86
+    }
+   ]
+  },
+  {
+   "i": 38,
+   "text": "Hundred thousand GPU",
+   "start": 118.755,
+   "end": 120.76,
+   "words": [
+    {
+     "w": "Hundred",
+     "start": 118.755,
+     "end": 119.224,
+     "conf": 0.91
+    },
+    {
+     "w": "thousand",
+     "start": 119.224,
+     "end": 119.74,
+     "conf": 0.89
+    },
+    {
+     "w": "GPU",
+     "start": 119.74,
+     "end": 120.76,
+     "conf": 0.89,
+     "syl": [
+      [
+       119.74,
+       119.96
+      ],
+      [
+       119.96,
+       120.22
+      ],
+      [
+       120.22,
+       120.76
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 39,
+   "text": "RLHF goes askew",
+   "start": 120.76,
+   "end": 124.52,
+   "words": [
+    {
+     "w": "RLHF",
+     "start": 120.76,
+     "end": 121.58,
+     "conf": 0.72,
+     "syl": [
+      [
+       120.76,
+       121.0
+      ],
+      [
+       121.0,
+       121.2
+      ],
+      [
+       121.2,
+       121.42
+      ],
+      [
+       121.42,
+       121.58
+      ]
+     ]
+    },
+    {
+     "w": "goes",
+     "start": 121.58,
+     "end": 121.88,
+     "conf": 0.92
+    },
+    {
+     "w": "askew",
+     "start": 121.88,
+     "end": 124.52,
+     "conf": 0.88
+    }
+   ]
+  },
+  {
+   "i": 40,
+   "text": "I'm upping my P(doom)",
+   "start": 124.52,
+   "end": 126.12,
+   "words": [
+    {
+     "w": "I'm",
+     "start": 124.52,
+     "end": 124.78,
+     "conf": 0.35
+    },
+    {
+     "w": "upping",
+     "start": 124.78,
+     "end": 125.2,
+     "conf": 0.35
+    },
+    {
+     "w": "my",
+     "start": 125.2,
+     "end": 125.4,
+     "conf": 0.4
+    },
+    {
+     "w": "P(doom)",
+     "start": 125.4,
+     "end": 126.12,
+     "conf": 0.45,
+     "syl": [
+      [
+       125.4,
+       125.66
+      ],
+      [
+       125.66,
+       126.12
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 41,
+   "text": "Just as foretold by Loom",
+   "start": 126.12,
+   "end": 127.92,
+   "words": [
+    {
+     "w": "Just",
+     "start": 126.12,
+     "end": 126.42,
+     "conf": 0.69
+    },
+    {
+     "w": "as",
+     "start": 126.42,
+     "end": 126.537,
+     "conf": 0.85
+    },
+    {
+     "w": "foretold",
+     "start": 126.537,
+     "end": 127.26,
+     "conf": 0.82
+    },
+    {
+     "w": "by",
+     "start": 127.26,
+     "end": 127.54,
+     "conf": 0.83
+    },
+    {
+     "w": "Loom",
+     "start": 127.54,
+     "end": 127.92,
+     "conf": 0.78
+    }
+   ]
+  },
+  {
+   "i": 42,
+   "text": "From masked pre-training days",
+   "start": 127.92,
+   "end": 129.82,
+   "words": [
+    {
+     "w": "From",
+     "start": 127.92,
+     "end": 128.2,
+     "conf": 0.9
+    },
+    {
+     "w": "masked",
+     "start": 128.2,
+     "end": 128.6,
+     "conf": 0.84
+    },
+    {
+     "w": "pre-training",
+     "start": 128.6,
+     "end": 129.3,
+     "conf": 0.91,
+     "syl": [
+      [
+       128.6,
+       128.673
+      ],
+      [
+       128.673,
+       129.3
+      ]
+     ]
+    },
+    {
+     "w": "days",
+     "start": 129.3,
+     "end": 129.82,
+     "conf": 0.96
+    }
+   ]
+  },
+  {
+   "i": 43,
+   "text": "To recursive self-upgrade",
+   "start": 129.82,
+   "end": 131.636,
+   "words": [
+    {
+     "w": "To",
+     "start": 129.82,
+     "end": 130.02,
+     "conf": 0.89
+    },
+    {
+     "w": "recursive",
+     "start": 130.02,
+     "end": 130.573,
+     "conf": 0.76
+    },
+    {
+     "w": "self-upgrade",
+     "start": 130.573,
+     "end": 131.636,
+     "conf": 0.84,
+     "syl": [
+      [
+       130.573,
+       130.94
+      ],
+      [
+       130.94,
+       131.636
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "i": 44,
+   "text": "What did Ilya see? We'll never know",
+   "start": 132.02,
+   "end": 136.944,
+   "words": [
+    {
+     "w": "What",
+     "start": 132.02,
+     "end": 132.284,
+     "conf": 0.85
+    },
+    {
+     "w": "did",
+     "start": 132.284,
+     "end": 132.524,
+     "conf": 0.9
+    },
+    {
+     "w": "Ilya",
+     "start": 132.524,
+     "end": 132.818,
+     "conf": 0.89
+    },
+    {
+     "w": "see?",
+     "start": 132.818,
+     "end": 133.38,
+     "conf": 0.82
+    },
+    {
+     "w": "We'll",
+     "start": 133.38,
+     "end": 133.88,
+     "conf": 0.61
+    },
+    {
+     "w": "never",
+     "start": 133.88,
+     "end": 134.34,
+     "conf": 0.82
+    },
+    {
+     "w": "know",
+     "start": 134.34,
+     "end": 136.944,
+     "conf": 0.77
+    }
+   ]
+  },
+  {
+   "i": 45,
+   "text": "Was it all for show?",
+   "start": 137.38,
+   "end": 140.55,
+   "words": [
+    {
+     "w": "Was",
+     "start": 137.38,
+     "end": 137.797,
+     "conf": 0.67
+    },
+    {
+     "w": "it",
+     "start": 137.797,
+     "end": 138.281,
+     "conf": 0.83
+    },
+    {
+     "w": "all",
+     "start": 138.445,
+     "end": 138.854,
+     "conf": 0.65
+    },
+    {
+     "w": "for",
+     "start": 139.149,
+     "end": 139.717,
+     "conf": 0.76
+    },
+    {
+     "w": "show?",
+     "start": 140.027,
+     "end": 140.55,
+     "conf": 0.8
+    }
+   ]
+  }
+ ],
+ "extras": [
+  {
+   "start": 34.9,
+   "end": 38.3,
+   "desc": "backing-vocal tail / 'ah' ad-lib after 'eyes' over the break (chorus 1 end)"
+  },
+  {
+   "start": 108.55,
+   "end": 110.06,
+   "desc": "lead-in before 'Just transformers': Whisper hears a stuttered 'Just, just, just' (low confidence)"
+  },
+  {
+   "start": 122.4,
+   "end": 125.9,
+   "desc": "sustained backing 'ah' pad under 'I'm upping my P(doom)' (final chorus) - lead is buried here"
+  },
+  {
+   "start": 140.7,
+   "end": 153.58,
+   "desc": "outro chant: repeated 'oh' / 'oh-oh' vocal hook (Whisper: 'Oh, oh, oh...') until the drums stop at ~153"
+  }
+ ],
+ "notes": "Timeline = gapless mp3 decode (same as data/audio.json); Demucs stems shifted -23 ms (LAME encoder delay). Method: (1) CTC emissions (20 ms frames) of the Demucs vocal stem from two acoustic models, torchaudio MMS_FA and wav2vec2-large-lv60k-960h, each on the mono sum and on the left and right channels (choruses are double-tracked L/R), fused as a probability mixture; (2) one global constrained Viterbi forced alignment of all 46 lines over the whole song with a garbage 'star' token between lines to absorb ad-libs; acronyms/odd words aligned with phonetic spellings (AGI='ay gee i', P(doom)='pee doom', ChatGPT='chat gee pee tee', NVDA='en vee dee ay', MLP='em el pee', CDR='see dee are', PTO='pee tee oh', GPU='gee pee you', RLHF='are el aitch eff', One E thirty='one ee thirty', Neumann's='noymans'); (3) signal refinement per syllable unit on the vocal stem: start moved to the voice re-entry after a rest, snapped to the nearest spectral-flux onset, or moved back to the start of s/sh/ch/f/th frication; ends = next word start when legato, else when the voice drops 15 dB below the word level (held notes keep their full length); (4) cross-check against mlx-whisper large-v3-turbo word timestamps and the individual models/channels, plus a mel-roformer karaoke lead-vocal stem for the final chorus; (5) manual verification of every line on zoomed spectrogram/pitch/onset plots (analysis/qa/zl_*.png) with ~20 manual corrections (align.py FIX). conf: 0.35 + agreement of the independent alignments (<=60 ms) + CTC posterior + Whisper agreement; manual fixes carry their own conf. 'syl' = start/end of each spelled letter or compound part (AGI, ChatGPT, P(doom), NVDA, MLP, CDR, PTO, GPU, RLHF, Killswitch, Post-Chinchilla, super-dense, pre-training, self-upgrade). NVDA pronunciation is ambiguous: 'Nvidia' scores slightly better acoustically than 'en-vee-dee-ay', but the word timing is the same either way (62.54-63.36), so syl uses the letter split. Uncertain words: final-chorus 'I'm upping my' (124.5-125.4, buried under a backing pad, placed by rhythm of the other choruses, +-100 ms); 'are' (83.93, could be 84.58); 'me' (57.14); 'alive' (21.35); 'eat' (20.27); 'Just transformers' region (108.5-110.2 lead-in); chorus 'I'm' pickups (22.76, 59.13, 95.47) +-50 ms; 'lies,' 31.14. Everything else is expected within ~30-50 ms at word starts."
+}

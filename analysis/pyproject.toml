@@ -1,0 +1,19 @@
+[project]
+name = "analysis"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "audio-separator>=0.47.0",
+    "audioread>=3.1.0",
+    "demucs>=4.0.1",
+    "fonttools>=4.66.0",
+    "librosa>=1.0.0",
+    "matplotlib>=3.11.2",
+    "mlx-whisper>=0.4.3",
+    "numpy>=2.5.3",
+    "onnxruntime>=1.30.0",
+    "scipy>=1.18.1",
+    "soundfile>=0.14.0",
+    "torch>=2.14.0",
+    "torchaudio>=2.11.0",
+]
