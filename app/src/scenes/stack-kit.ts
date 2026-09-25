@@ -74,6 +74,9 @@ export class TextPlane {
   /** World width/height of the ink box (cap height x advance). */
   w: number;
   h: number;
+  /** World size of the em, and x of the ink box's left edge relative to the pen origin (for setting planes on a text layout). */
+  em: number;
+  inkX: number;
   text: string;
   constructor(text: string, family: string, o: TextPlaneOpts) {
     this.text = text;
@@ -117,6 +120,8 @@ export class TextPlane {
     const s = o.capH / cap; // world units per px
     this.w = (inkR - inkL) * s;
     this.h = o.capH;
+    this.em = px * s;
+    this.inkX = inkL * s;
     const gw = W * s, gh = H * s;
     const geo = new THREE.PlaneGeometry(gw, gh);
     // anchor: ink box x in [pad, W-pad] px, baseline at by, cap top at by - cap

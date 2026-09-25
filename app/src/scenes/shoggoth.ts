@@ -19,7 +19,7 @@ import * as THREE from 'three';
 import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { rgba } from '../engine/palette';
-import { F, font, layout } from '../engine/type';
+import { F, font, layout, measure } from '../engine/type';
 import { Lyrics, type Line, type Word } from '../engine/lyrics';
 import { PDoom, formatPDoom, drawReadout } from '../engine/hud';
 import { clamp, lerp, ease, prog, springStep, pulse, hash, TAU } from '../engine/util';
@@ -689,7 +689,11 @@ export default class Shoggoth extends Scene {
       c.fillStyle = rgba('signal');
       const pct = clamp(bx / W) * 100;
       const hx = clamp(bx - bw + 8, 70, W - 250);
-      c.fillText(`XR ▸ ${pct.toFixed(0).padStart(3, '0')}%`, hx, 128);
+      c.fillText(`XR   ${pct.toFixed(0).padStart(3, '0')}%`, hx, 128);
+      // ▸ (not in Plex Mono): a small triangle drawn in the blank fourth cell
+      const cell = measure(' ', F.mono(500), 13) + 2;
+      const tx = hx + cell * 3 + (cell - 2) / 2, ty = 128 - 4.2;
+      c.beginPath(); c.moveTo(tx - 2.4, ty - 3); c.lineTo(tx + 2.7, ty); c.lineTo(tx - 2.4, ty + 3); c.closePath(); c.fill();
       c.fillStyle = rgba('bone', 0.7);
       c.fillText('SEE-THROUGH MODE', hx, 148);
       c.letterSpacing = '0px';

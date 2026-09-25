@@ -12,7 +12,7 @@ import * as THREE from 'three';
 import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { FSPass, Layer2D, W, H, makeRT } from '../engine/gl';
 import { type Line, type Word, norm } from '../engine/lyrics';
-import { F, font, measure, layout } from '../engine/type';
+import { F, font, measure, layout, glyphX } from '../engine/type';
 import { strokeText, drawStrokeText, type StrokeText } from '../engine/stroke';
 import { clamp, ease, lerp, prog, hash, noise1, pulse, TAU } from '../engine/util';
 import { PDoom, formatPDoom } from '../engine/hud';
@@ -645,7 +645,7 @@ export default class Bureau extends Scene {
     c.fillStyle = PRINT(0.8); c.fillRect(x0, A.y + 415, x1 - x0, 1);
     c.fillStyle = PRINT(0.75);
     c.font = font(F.mono(400), 14);
-    c.fillText('* "Safe enough" is defined in Form 7-C, which has not been drafted. Do not detach.', x0 + 10, A.y + 445);
+    c.fillText('* “Safe enough” is defined in Form 7-C, which has not been drafted. Do not detach.', x0 + 10, A.y + 445);
     // 5. the P(doom) field, right under where the stamp lands
     {
       const fx = A.x + 230, fy = A.y + 452;
@@ -755,8 +755,17 @@ export default class Bureau extends Scene {
     for (let x = -1400; x < 1400; x += 18) c.fillRect(x, y, 9, 1.4);
     c.font = font(F.mono(500), 13); c.letterSpacing = '4px';
     c.fillStyle = PRINT(0.6);
-    c.fillText('✂  DETACH HERE — RETAIN LOWER PORTION FOR YOUR RECORDS', -440, y - 12);
+    c.fillText('   DETACH HERE — RETAIN LOWER PORTION FOR YOUR RECORDS', -440, y - 12);
     c.letterSpacing = '0px';
+    // the scissors (no font here has ✂), drawn in the first cell: two finger rings, crossed blades
+    const sx = -440, sy = y - 16.5;
+    c.strokeStyle = PRINT(0.6); c.lineWidth = 1.1;
+    c.beginPath();
+    c.arc(sx + 2.2, sy - 3, 2.2, 0, Math.PI * 2);
+    c.moveTo(sx + 4.4, sy + 3); c.arc(sx + 2.2, sy + 3, 2.2, 0, Math.PI * 2);
+    c.moveTo(sx + 4, sy - 1.8); c.lineTo(sx + 12.5, sy + 2.4);
+    c.moveTo(sx + 4, sy + 1.8); c.lineTo(sx + 12.5, sy - 2.4);
+    c.stroke();
     c.restore();
   }
 
@@ -849,7 +858,7 @@ export default class Bureau extends Scene {
     // loss
     const lx = 730;
     c.fillStyle = PRINT(1); c.font = font(F.serif(400, true), 40);
-    c.fillText('ℒ', lx, 12);
+    c.fillText('L', lx, 12); // italic L for the loss (Cormorant has no script ℒ)
     c.textAlign = 'left';
     for (const y of Ls[3]!.ys) { c.strokeStyle = PRINT(0.5); c.lineWidth = 1.1; c.beginPath(); c.moveTo(Ls[3]!.x + R + 3, y); c.lineTo(lx - 22, 0); c.stroke(); }
 
@@ -857,7 +866,7 @@ export default class Bureau extends Scene {
     c.fillStyle = PRINT(0.75);
     c.fillText('FORWARD PASS  →', -470, -226);
     c.textAlign = 'right';
-    c.fillText('←  BACKWARD PASS  (∂ℒ/∂θ)', 860, -160);
+    c.fillText('←  BACKWARD PASS  (∂L/∂w)', 860, -160);
     c.textAlign = 'left'; c.letterSpacing = '0px';
 
     // epoch counter
@@ -892,6 +901,8 @@ export default class Bureau extends Scene {
       const ts = this.syl[k]![0];
       if (t < ts) return;
       const w = measure(ch, fam, size);
+      // the lyric's comma after P, kerned in under the P's bowl; the syllable bar stops where it starts
+      const wb = k === 2 ? glyphX(ch + ',', 1, fam, size) : w;
       const pop = pulse(t, ts, 0.06);
       const x = Ls[k + 1]!.x;
       c.save();
@@ -899,29 +910,28 @@ export default class Bureau extends Scene {
       c.scale(1 + 0.1 * pop, 1 + 0.1 * pop);
       c.fillStyle = PRINT(1);
       c.fillText(ch, -w / 2, 0);
-      if (k === 2) c.fillText(',', w / 2, 0);
+      if (k === 2) c.fillText(',', -w / 2 + wb, 0);
       c.restore();
       const u = prog(t, ts, ts + 0.14, ease.outCubic) * (1 - prog(t, this.syl[k]![1] + 0.1, this.syl[k]![1] + 0.2));
-      if (u > 0) { c.fillStyle = ORANGE(1); c.fillRect(x - w / 2, yTop + 18, w * u, 9); }
+      if (u > 0) { c.fillStyle = ORANGE(1); c.fillRect(x - w / 2, yTop + 18, wb * u, 9); }
     });
     // "backward," mirrored and set right -> left under the diagram
     if (t >= this.tBack0) {
       const bs = 116;
-      const word = Array.from(this.wBack.w);
-      const perB = Math.min(0.05, (this.wBack.end - this.wBack.start) / word.length);
+      // the mirror image of the kerned word: glyph i at the mirrored kerned position
+      const lay = layout(this.wBack.w, fam, bs);
+      const perB = Math.min(0.05, (this.wBack.end - this.wBack.start) / lay.glyphs.length);
       c.font = font(fam, bs);
-      let xr = Ls[3]!.x + 70;
-      word.forEach((ch, i) => {
-        const w = measure(ch, fam, bs);
-        if (t >= this.tBack0 + i * perB) {
-          c.save(); c.translate(xr, 372); c.scale(-1, 1);
-          c.fillStyle = PRINT(1); c.fillText(ch, 0, 0);
+      const xr0 = Ls[3]!.x + 70, xr = xr0 - lay.width;
+      for (const g of lay.glyphs) {
+        if (t >= this.tBack0 + g.i * perB) {
+          c.save(); c.translate(xr0 - g.x, 372); c.scale(-1, 1);
+          c.fillStyle = PRINT(1); c.fillText(g.ch, 0, 0);
           c.restore();
         }
-        xr -= w;
-      });
+      }
       const u = prog(t, this.tBack0, this.tBack1, ease.linear);
-      if (u > 0 && u < 1) { c.fillStyle = ORANGE(1); c.fillRect(Ls[3]!.x + 70 - (Ls[3]!.x + 70 - xr) * u, 390, 12, 9); }
+      if (u > 0 && u < 1) { c.fillStyle = ORANGE(1); c.fillRect(xr0 - (xr0 - xr) * u, 390, 12, 9); }
     }
     // "repeat" at the far left of the same row, re-stamped on every stutter
     if (t >= this.tRep0) {
@@ -957,20 +967,27 @@ export default class Bureau extends Scene {
     // heading: the lyric, printed word by word
     const fam = F.archivo(100, 900), size = 112;
     c.font = font(fam, size);
-    let x = -820;
+    const hx = -820;
     const hy = -340;
-    for (const w of [this.wNow, this.wVon, this.wNeu]) {
-      const ww = measure(w.w + ' ', fam, size);
+    // each word printed on its own, at its kerned position in the heading set as one run
+    const hws = [this.wNow, this.wVon, this.wNeu];
+    const head = hws.map((w) => w.w).join(' ');
+    let gi = 0, extra = 0, prev = '';
+    for (const w of hws) {
+      // optical word space: two diagonals facing across it ("Now von") read as one word at the font's space
+      if (/[vwyVWY]$/.test(prev) && /^[vwyVWYAT]/.test(w.w)) extra += 0.07 * size;
+      prev = w.w;
       if (t >= w.start) {
         const k = prog(t, w.start, w.start + 0.07, ease.outCubic);
         c.save();
-        c.translate(x, hy + 10 * (1 - k));
+        c.translate(hx + extra + glyphX(head, gi, fam, size), hy + 10 * (1 - k));
         c.fillStyle = PRINT(k);
         c.fillText(w.w, 0, 0);
         c.restore();
       }
-      x += ww;
+      gi += Array.from(w.w).length + 1;
     }
+    const x = hx + extra + measure(head + ' ', fam, size);
     this.drawVonNeumann(c, t);
     // orange marker strikes
     const strike = (x0: number, y0: number, x1: number, y1: number, t0: number, seed: number) => {

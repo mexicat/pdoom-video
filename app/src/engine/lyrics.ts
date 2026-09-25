@@ -1,7 +1,8 @@
 // Word-timed lyrics (data/lyrics.json) with queries for karaoke rendering.
+import { smart } from './type';
 
 export interface Word {
-  w: string; // display token (punctuation attached)
+  w: string; // display token (punctuation attached, typographic quotes: don’t, ’cause)
   start: number;
   end: number;
   conf?: number;
@@ -23,10 +24,13 @@ export class Lyrics {
   lines: Line[];
   words: Word[];
   constructor(j: { lines: Omit<Line, 'words'> & { words: Omit<Word, 'line' | 'index' | 'gi'>[] }[] | any[] }) {
+    // display text gets curly apostrophes and quotes (the data keeps the typed ones); mono UI
+    // text that wants them straight uses plain()
     this.lines = (j.lines as any[]).map((l, li) => ({
       ...l,
       i: li,
-      words: (l.words as any[]).map((w, wi) => ({ ...w, line: li, index: wi, gi: 0 })),
+      text: smart(l.text),
+      words: (l.words as any[]).map((w, wi) => ({ ...w, w: smart(w.w), line: li, index: wi, gi: 0 })),
     }));
     this.words = this.lines.flatMap((l) => l.words);
     this.words.forEach((w, i) => (w.gi = i));
@@ -56,10 +60,10 @@ export class Lyrics {
   linesIn(t0: number, t1: number): Line[] {
     return this.lines.filter((l) => l.end > t0 && l.start < t1);
   }
-  /** Lines whose text includes `s` (case-insensitive). Handy for finding a lyric by content. */
+  /** Lines whose text includes `s` (case-insensitive, straight or curly quotes). Handy for finding a lyric by content. */
   find(s: string): Line[] {
-    const q = s.toLowerCase();
-    return this.lines.filter((l) => l.text.toLowerCase().includes(q));
+    const q = fold(s);
+    return this.lines.filter((l) => fold(l.text).includes(q));
   }
   /** First line containing `s`; throws if missing (fail loudly while authoring). */
   get(s: string, nth = 0): Line {
@@ -114,3 +118,4 @@ export class Lyrics {
 }
 
 export const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9()]/g, '');
+const fold = (s: string) => s.toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');

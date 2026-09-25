@@ -62,13 +62,13 @@ function lay(text: string, fam: string, size: number, trackPx: number) {
   if (!l) { l = layout(text, fam, size, trackPx); layCache.set(k, l); }
   return l;
 }
-/** x (relative to the text origin) after n (fractional) glyphs. */
-function xAt(l: TextLayout, n: number, trackPx: number) {
+/** x (relative to the text origin) after n (fractional) glyphs: kerned glyph positions, continuous in n. */
+function xAt(l: TextLayout, n: number) {
   if (n <= 0) return 0;
   const g = l.glyphs;
   if (n >= g.length) return l.width;
   const i = Math.floor(n), f = n - i;
-  return g[i]!.x + (g[i]!.w + trackPx) * f;
+  return lerp(g[i]!.x, i + 1 < g.length ? g[i + 1]!.x : l.width, f);
 }
 
 const glowRGB = (k: number): RGB => [LIN.ember[0] * k, LIN.ember[1] * k, LIN.ember[2] * k];
@@ -210,6 +210,8 @@ export class Press {
     const scroll = 24 * u + 150 * u * u;
     const pr = (k + sp) / 4;
     const copyCol = mixCss('graphite', 'ash', 0.35 * clamp(pr * 1.3 - 0.3));
+    // the two lines alternate a step apart in value: packed rows overlap as flat layers (no outlines)
+    const copyColB = mixCss('graphite', 'ash', 0.35 * clamp(pr * 1.3 - 0.3) - 0.14);
 
     c.save();
     if (rel === 0) { bowPath(c, TITLE, bow); c.clip(); }
@@ -252,27 +254,30 @@ export class Press {
       const phase = ((Math.floor(i / 2) % 2 + 2) % 2) * 0.5 * uu + (isA ? 0 : 0.25 * uu);
       const x0 = TITLE.x0 - phase + dir * (scroll % uu) - uu;
       const alpha = 1;
-      this.row(c, txt, x0, y, uu, sx, alpha, copyCol, 0.05 * S, xoff);
+      this.row(c, txt, x0, y, uu, sx, alpha, isA ? copyCol : copyColB, xoff);
     }
-    // hero pair on top: static, flush with the fence, karaoke
+    // hero pair on top: static, flush with the fence, karaoke — set on a flat ink band across the
+    // fence that the packed copies slide under (it goes with the release)
+    const band = heroes.length ? 1 - prog(rel, 0, 0.12) : 0;
+    if (band > 0) {
+      const ys = heroes.map(([y]) => y), pad = 0.16 * cap;
+      c.fillStyle = rgba('ink', band);
+      c.fillRect(TITLE.x0 - 40, Math.min(...ys) - cap - pad, TITLE.x1 - TITLE.x0 + 80, Math.max(...ys) - Math.min(...ys) + cap + 2 * pad);
+    }
     for (const [y, xoff, isA] of heroes) {
       const txt = isA ? this.A : this.B, l = isA ? lA : lB, uu = isA ? uA : uB, n = isA ? nA : nB;
       const w = isA ? this.wA : this.wB;
       const contA = clamp(springStep(t - this.kicks[1]!, 2.6, 0.5) * 1.6);
-      if (contA > 0) this.row(c, txt, TITLE.x0 + uu, y, uu, sx, contA, copyCol, 0.05 * S, xoff);
-      if (rel > 0) { this.row(c, txt, TITLE.x0, y, uu, sx, 1, copyCol, 0.05 * S, xoff); continue; }
+      if (contA > 0) this.row(c, txt, TITLE.x0 + uu, y, uu, sx, contA, isA ? copyCol : copyColB, xoff);
+      if (rel > 0) { this.row(c, txt, TITLE.x0, y, uu, sx, 1, isA ? copyCol : copyColB, xoff); continue; }
       const alpha = 1;
       c.save();
       c.translate(TITLE.x0, 0); c.scale(sx, 1); c.translate(-TITLE.x0, 0);
       const x = TITLE.x0 + xoff;
-      c.strokeStyle = rgba('ink', alpha); c.lineWidth = 0.12 * S;
-      c.strokeText(txt, x, y);
-      c.fillStyle = rgba('ink', alpha);
-      c.fillText(txt, x, y);
       c.fillStyle = rgba('bone', 0.3 * alpha);
       c.fillText(txt, x, y);
       if (n > 0) {
-        const s = xAt(l, n, tr);
+        const s = xAt(l, n);
         c.save(); c.beginPath(); c.rect(x - 20, y - S * 1.2, s + 20, S * 1.6); c.clip();
         c.fillStyle = t < w.end + 0.05 ? rgba('signal', alpha) : rgba('bone', alpha);
         c.fillText(txt, x, y);
@@ -283,8 +288,8 @@ export class Press {
     c.restore();
   }
 
-  /** One row of repeated copies (knockout stroke, then fill), squeezed horizontally about the fence. */
-  private row(c: CanvasRenderingContext2D, txt: string, x0: number, y: number, uu: number, sx: number, alpha: number, col: string, ko: number, xoff = 0) {
+  /** One row of repeated copies (flat fill), squeezed horizontally about the fence. */
+  private row(c: CanvasRenderingContext2D, txt: string, x0: number, y: number, uu: number, sx: number, alpha: number, col: string, xoff = 0) {
     if (alpha <= 0.002) return;
     c.save();
     c.translate(TITLE.x0 + xoff, 0); c.scale(sx, 1); c.translate(-TITLE.x0, 0);
@@ -292,8 +297,6 @@ export class Press {
     const xs: number[] = [];
     const xEnd = TITLE.x0 + (TITLE.x1 - TITLE.x0) / sx;
     for (let x = x0; x < xEnd; x += uu) if (x + uu > TITLE.x0) xs.push(x);
-    c.strokeStyle = rgba('ink', alpha); c.lineWidth = ko;
-    for (const x of xs) c.strokeText(txt, x, y);
     c.globalAlpha = alpha;
     c.fillStyle = col;
     for (const x of xs) c.fillText(txt, x, y);
@@ -366,16 +369,15 @@ export class Press {
       // the first line is punched out of the slab: a solid ink cut-out until the debris has cleared
       if (i === 0 && t < this.c2 + 0.35) {
         const ko = 1 - prog(t, this.c2 + 0.15, this.c2 + 0.35);
-        c.strokeStyle = rgba('ink', ko); c.lineWidth = r.size * 0.035; c.strokeText(r.text, x0, base);
         c.fillStyle = rgba('ink', ko); c.fillText(r.text, x0, base);
       }
       // per-word karaoke: outline before, signal wipe while sung, bone after
       let ci = 0;
       r.words.forEach((w, wi) => {
         const wt = w.w.replace(/[^A-Za-z-]/g, '').toUpperCase();
-        const a = xAt(l, ci, 0), bx = xAt(l, ci + wt.length, 0);
+        const a = xAt(l, ci), bx = xAt(l, ci + wt.length);
         const n = sungChars(w, wt, t);
-        const s = xAt(l, ci + n, 0);
+        const s = xAt(l, ci + n);
         c.save(); c.beginPath(); c.rect(x0 + a - 4, base - r.size * 1.2, bx - a + 8, r.size * 1.6); c.clip();
         if (n < wt.length) {
           c.lineWidth = Math.max(1.5, 1.6 / b.k);

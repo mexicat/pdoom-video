@@ -258,7 +258,13 @@ export class LoomTree {
         c.letterSpacing = '3px';
         c.fillStyle = rgba('signal', 0.95);
         c.textBaseline = 'top';
-        c.fillText(`p ${CHOSEN_P[i]!.toFixed(2)}  ▸ SAMPLED`, 6 / s, (24 + 12) / s);
+        // the marker is drawn (IBM Plex Mono has no ▸; the fallback glyph came from a system font)
+        const pre = `p ${CHOSEN_P[i]!.toFixed(2)}  `, tx = 6 / s, ty = (24 + 12) / s;
+        c.fillText(`${pre}  SAMPLED`, tx, ty);
+        const cell = c.measureText('M').width - 3, mx = tx + c.measureText(pre).width + cell / 2;
+        const cap = c.measureText('S'), my = ty + (cap.actualBoundingBoxDescent - cap.actualBoundingBoxAscent) / 2;
+        const th = 0.44 * 17, tw = 0.38 * 17;
+        c.beginPath(); c.moveTo(mx - tw / 2, my - th / 2); c.lineTo(mx + tw / 2, my); c.lineTo(mx - tw / 2, my + th / 2); c.closePath(); c.fill();
       } else {
         // written by the tip, glyph by glyph; hot while sung, cooling to bone
         c.beginPath(); c.rect(x - 4, Y0 - 200, Math.max(0, tip - x + 6), 260); c.clip();

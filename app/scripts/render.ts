@@ -30,7 +30,8 @@ async function ensureServer(): Promise<{ url: string; stop: () => void }> {
   const url = opt('url', 'http://localhost:5173')!;
   if (await reachable(url)) return { url, stop: () => {} };
   const port = 5300 + Math.floor(Math.random() * 500);
-  const proc = Bun.spawn(['bunx', 'vite', '--port', String(port), '--strictPort'], { cwd: APP, stdout: 'ignore', stderr: 'ignore' });
+  // no live reload: a file saved mid-render must not reload the page
+  const proc = Bun.spawn(['bunx', 'vite', '--port', String(port), '--strictPort'], { cwd: APP, stdout: 'ignore', stderr: 'ignore', env: { ...process.env, PDOOM_NO_HMR: '1' } });
   const u = `http://localhost:${port}`;
   for (let i = 0; i < 100 && !(await reachable(u)); i++) await Bun.sleep(100);
   return { url: u, stop: () => proc.kill() };

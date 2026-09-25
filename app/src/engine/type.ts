@@ -9,13 +9,15 @@ import * as opentype from 'opentype.js';
 export const ARCHIVO_WIDTHS = [620, 750, 875, 1000, 1125, 1250] as const;
 export const ARCHIVO_WEIGHTS = [300, 500, 700, 900] as const;
 
-type FontDef = { family: string; file: string };
+/** `features`: OpenType features switched on for the face (Canvas2D has no font-feature-settings). */
+type FontDef = { family: string; file: string; features?: string };
 const DEFS: FontDef[] = [];
 for (const w of ARCHIVO_WIDTHS) for (const wt of ARCHIVO_WEIGHTS) DEFS.push({ family: `Archivo-${w}-${wt}`, file: `Archivo-w${w}-${wt}.ttf` });
 for (const w of [750, 1000]) for (const wt of [400, 800]) DEFS.push({ family: `ArchivoItalic-${w}-${wt}`, file: `ArchivoItalic-w${w}-${wt}.ttf` });
+// Cormorant defaults to old-style figures ("10" reads as "IO" at display sizes): lining figures instead
 for (const wt of [400, 600]) {
-  DEFS.push({ family: `Cormorant-${wt}`, file: `Cormorant-${wt}.ttf` });
-  DEFS.push({ family: `CormorantItalic-${wt}`, file: `CormorantItalic-${wt}.ttf` });
+  DEFS.push({ family: `Cormorant-${wt}`, file: `Cormorant-${wt}.ttf`, features: '"lnum" 1' });
+  DEFS.push({ family: `CormorantItalic-${wt}`, file: `CormorantItalic-${wt}.ttf`, features: '"lnum" 1' });
 }
 for (const [n, f] of [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'SemiBold'], ['700', 'Bold']] as const)
   DEFS.push({ family: `Plex-${n}`, file: `src/IBMPlexMono-${f}.ttf` });
@@ -58,7 +60,7 @@ export async function loadFonts(): Promise<void> {
     DEFS.map(async (d) => {
       const buf = await (await fetch(`fonts/${d.file}`)).arrayBuffer();
       bufCache.set(d.family, buf);
-      const ff = new FontFace(d.family, buf);
+      const ff = new FontFace(d.family, buf, d.features ? { featureSettings: d.features } : undefined);
       await ff.load();
       document.fonts.add(ff);
     }),
@@ -101,7 +103,10 @@ function mctx() {
 }
 
 /**
- * Per-glyph horizontal layout (kerning-aware: x of glyph i = width of prefix [0..i)).
+ * Per-glyph horizontal layout with the font's kerning, for drawing glyphs one by one.
+ * Glyph i sits at the width of text[0..i] minus its own advance, so the kerning between it and the
+ * previous glyph moves *it* (the width of text[0..i) alone leaves that pair out: every kern would land
+ * one glyph late, e.g. the Y–o kern of "Your" pushing the u into the o). `w` is the glyph's own advance.
  * `tracking` is extra letter spacing in px.
  */
 export function layout(text: string, family: string, size: number, tracking = 0): TextLayout {
@@ -110,23 +115,52 @@ export function layout(text: string, family: string, size: number, tracking = 0)
   const glyphs: Glyph[] = [];
   const chars = Array.from(text);
   let prefix = '';
-  let prevW = 0;
   for (let i = 0; i < chars.length; i++) {
-    const x = prevW + i * tracking;
-    prefix += chars[i];
-    const wNow = c.measureText(prefix).width;
-    glyphs.push({ ch: chars[i]!, i, x, w: wNow - prevW });
-    prevW = wNow;
+    const ch = chars[i]!;
+    prefix += ch;
+    const w = c.measureText(ch).width;
+    glyphs.push({ ch, i, x: c.measureText(prefix).width - w + i * tracking, w });
   }
   const m = c.measureText(text || 'M');
   return {
     text, family, size,
-    width: prevW + Math.max(0, chars.length - 1) * tracking,
+    width: (text ? m.width : 0) + Math.max(0, chars.length - 1) * tracking,
     ascent: m.fontBoundingBoxAscent ?? size * 0.8,
     descent: m.fontBoundingBoxDescent ?? size * 0.2,
     glyphs,
   };
 }
+
+/**
+ * x (px) of glyph `index` in `text` set as one kerned run — where to start drawing text[index..] when a
+ * word is split into separately drawn pieces (sung/unsung colours, a clipped wipe). Measuring
+ * text[0..index) instead would drop the kern between the two pieces. Past the end: the run's width.
+ */
+export function glyphX(text: string, index: number, family: string, size: number, tracking = 0): number {
+  const chars = Array.from(text);
+  if (index <= 0) return 0;
+  if (index >= chars.length) return measure(text, family, size, tracking);
+  const c = mctx();
+  c.font = font(family, size);
+  return c.measureText(chars.slice(0, index + 1).join('')).width - c.measureText(chars[index]!).width + index * tracking;
+}
+
+/**
+ * Typographic punctuation for display text: curly apostrophes and quotes, the ellipsis character.
+ * Leading elisions (’cause, ’til, ’em, ’90s) get an apostrophe, not an opening quote.
+ */
+export function smart(s: string): string {
+  return s
+    .replace(/\.\.\./g, '…')
+    .replace(/(^|[\s([{—–-])'(?=(?:cause|cos|til|em|round|n|tis|twas|\d0s)\b)/gi, '$1’')
+    .replace(/(^|[\s([{—–-])'/g, '$1‘')
+    .replace(/'/g, '’')
+    .replace(/(^|[\s([{—–-])"/g, '$1“')
+    .replace(/"/g, '”');
+}
+
+/** Typewriter quotes back (mono UI text that shows a lyric as typed input or code). */
+export const plain = (s: string) => s.replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...');
 
 export function measure(text: string, family: string, size: number, tracking = 0) {
   const c = mctx();

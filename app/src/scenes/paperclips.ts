@@ -10,7 +10,7 @@ import { Scene, type Frame } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font, layout } from '../engine/type';
+import { F, font, layout, plain } from '../engine/type';
 import { Lyrics, type Line } from '../engine/lyrics';
 import { clamp, ease, lerp, prog, keys, hash, noise1, smoothstep, type Key } from '../engine/util';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -367,23 +367,25 @@ export default class Paperclips extends Scene {
     // the lyric, typed as sung
     const size = 40;
     c.font = font(F.mono(500), size);
-    // typed as sung: a word's first key lands on its first syllable
+    // typed as sung: a word's first key lands on its first syllable. A typed subject line in mono
+    // UI text: typewriter apostrophe (guy's), like the body's I'm
+    const text = plain(line.text), words = line.words.map((w) => plain(w.w));
     let n = 0;
-    for (const w of line.words) {
+    for (const [i, w] of line.words.entries()) {
       const p = Lyrics.wordProgress(w, t);
       if (p <= 0) break;
-      n = line.text.indexOf(w.w, n) + Math.ceil(p * w.w.length - 1e-6);
+      n = text.indexOf(words[i]!, n) + Math.ceil(p * words[i]!.length - 1e-6);
     }
-    const shown = line.text.slice(0, n);
+    const shown = text.slice(0, n);
     c.fillStyle = rgba('bone', 0.96);
     c.fillText(shown, pad, 128);
     const cur = line.words.find((w) => t >= w.start && t < w.end);
     if (cur) {
-      const pre = line.words.slice(0, cur.index).map((w) => w.w).join(' ') + (cur.index ? ' ' : '');
+      const pre = words.slice(0, cur.index).join(' ') + (cur.index ? ' ' : '');
       c.fillStyle = rgba('signal');
       c.fillText(shown.slice(pre.length), pad + c.measureText(pre).width, 128);
     }
-    if (Math.floor(t * 3.4) % 2 === 0 || (n > 0 && n < line.text.length)) {
+    if (Math.floor(t * 3.4) % 2 === 0 || (n > 0 && n < text.length)) {
       c.fillStyle = rgba('signal');
       c.fillRect(pad + c.measureText(shown).width + 5, 98, 3, 38);
     }

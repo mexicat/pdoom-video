@@ -191,8 +191,8 @@ export default class OpenScene extends Scene {
     place([w.make!, w.me!], ['make', 'me'], COLX, r2[1]!.y, r2[1]!.em, 'l2');
     place([w.nervous!], ['nervous,'], COLX - 0.04, r2[2]!.y, r2[2]!.em, 'l2');
     // line 3 on the left of the figure, with the surprisal underneath
-    const r3 = stack([["that's no", 1.45], ['surprise', 1.45]], 2.75, 5.3);
-    place([w.thats!, w.no!], ["that's", 'no'], this.eq.x, r3[0]!.y, r3[0]!.em, 'l3');
+    const r3 = stack([['that’s no', 1.45], ['surprise', 1.45]], 2.75, 5.3);
+    place([w.thats!, w.no!], ['that’s', 'no'], this.eq.x, r3[0]!.y, r3[0]!.em, 'l3');
     place([w.surprise!], ['surprise'], this.eq.x, r3[1]!.y, r3[1]!.em, 'l3');
     this.eq = pt(this.eq.x + 0.03, r3[1]!.y - DESC * r3[1]!.em - 0.42);
     this.row1 = { y: yR1, em: emR1 };
@@ -343,13 +343,13 @@ export default class OpenScene extends Scene {
       const ti = reach(Math.abs(i), 15);
       S(line(pt(i, 0.08), pt(i, -0.08)), ti, ti + 0.04, 'axis', { width: 1.0, group: 'axes' });
       for (let q = 1; q < 4; q++) if (Math.abs(i) < 14) S(line(pt(i + Math.sign(i) * q * 0.25, 0.035), pt(i + Math.sign(i) * q * 0.25, -0.035)), ti + 0.01, ti + 0.04, 'axis', { width: 1.0, alpha: 0.6, group: 'axes' });
-      this.note(String(i), i, -0.3, ti + 0.02, { em: 0.15, align: 'center', col: 'ash', a: 0.75, group: 'axes', dur: 0.03 });
+      this.note(tick(i), i, -0.3, ti + 0.02, { em: 0.15, align: 'center', col: 'ash', a: 0.75, group: 'axes', dur: 0.03 });
     }
     for (let i = -8; i <= 8; i++) {
       if (i === 0) continue;
       const ti = reach(Math.abs(i), 9);
       S(line(pt(-0.08, i), pt(0.08, i)), ti, ti + 0.04, 'axis', { width: 1.0, group: 'axes' });
-      this.note(String(i), -0.17, i - 0.055, ti + 0.02, { em: 0.15, align: 'right', col: 'ash', a: 0.75, group: 'axes', dur: 0.03 });
+      this.note(tick(i), -0.17, i - 0.055, ti + 0.02, { em: 0.15, align: 'right', col: 'ash', a: 0.75, group: 'axes', dur: 0.03 });
     }
     this.note('(0,0)', 0.1, -0.27, t0 + 0.1, { em: 0.15, col: 'ash', group: 'axes', dur: 0.05 });
     this.note('x', 14.55, 0.16, t0 + 0.4, { em: 0.2, col: 'ash', group: 'axes' });
@@ -1063,9 +1063,11 @@ export default class OpenScene extends Scene {
         ctx.fillText(cell.slice(0, Math.ceil(cell.length * typed)), 0, 0);
       });
       if (ri === cur) {
+        // the row marker: a small right-pointing triangle, drawn (Plex Mono has no ▸; the system
+        // fallback glyph would differ between machines), at the fallback ▸'s size and position
         this.tx(ctx, c, p.x - 0.22, y, 0.16);
         ctx.fillStyle = rgba('signal', ga);
-        ctx.fillText('▸', 0, 0);
+        ctx.beginPath(); ctx.moveTo(10.7, -45.4); ctx.lineTo(49.5, -26); ctx.lineTo(10.7, -6.6); ctx.closePath(); ctx.fill();
       }
     });
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -1150,6 +1152,9 @@ export default class OpenScene extends Scene {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 }
+
+/** Axis tick label, set like TikZ's math-mode ticks: a true minus sign (U+2212), not a hyphen. */
+const tick = (i: number) => (i < 0 ? `−${-i}` : String(i));
 
 /** Index of the horn's apex (highest point) and of its right base corner in the resampled triangle. */
 function hornApex(h: P[]) { let bi = 0; h.forEach((p, i) => { if (p.y > h[bi]!.y) bi = i; }); return bi; }

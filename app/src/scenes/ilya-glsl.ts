@@ -351,7 +351,7 @@ vec3 shade(vec3 ro, vec3 rd, float t, float mat) {
     float bounce = clamp(screenI, 0.0, 1.0) * props;
     tone = max(tone * 0.5, (0.013 + 0.02 * rim) * bounce);
     vec4 sk = texture(stickerTex, vec2(0.5 - l.x / 0.31, l.y / LID_L));
-    decal = vec4(sk.rgb * (0.16 + 0.1 * rim) * bounce * mix(vec3(1.0), C_EMBER / max(C_EMBER.r, 1e-3), 0.12), sk.a);
+    decal = vec4(sk.rgb * (0.105 + 0.065 * rim) * bounce * mix(vec3(1.0), C_EMBER / max(C_EMBER.r, 1e-3), 0.12), sk.a);
   } else if (mat < 5.5) {                // chair
     axis = vec3(0.0, 1.0, 0.0); sp = 0.006;
   } else if (mat < 6.5) {                // arch

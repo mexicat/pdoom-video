@@ -13,7 +13,7 @@ import type * as THREE from 'three';
 import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { HEX, rgba } from '../engine/palette';
-import { F, font, measure, layout, type TextLayout } from '../engine/type';
+import { F, font, measure, layout, plain, type TextLayout } from '../engine/type';
 import { PDoom, formatPDoom } from '../engine/hud';
 import type { Word } from '../engine/lyrics';
 import { clamp, ease, hash, lerp, noise1, prog, pulse, smoothstep } from '../engine/util';
@@ -22,6 +22,8 @@ import { sparkHead2D } from './_motifs';
 const CAP = 0.686; // Archivo cap height / em
 const PCAP = 0.698; // Plex Mono cap height / em
 const PADV = 0.6; // Plex Mono advance / em
+/** Space between the italic P and "(" (em): no kerning between the two runs, so it is set by eye (the italic P's bowl overhangs its advance). */
+const P_GAP = 0.05;
 
 /** The instrument at full scale: maths label top-left, digits, tick bar (hairline variant for n=3). */
 const BIG = { numSize: 720, numX: 92, numC: 585, labX: 118, labY: 214, labSize: 168, barX: 118, barY: 906, barW: W - 236 };
@@ -74,7 +76,7 @@ export default class Hook extends Scene {
     const line = lyrics.linesIn(start - 0.3, end).find((l) => /upping/i.test(l.text)) ?? lyrics.linesIn(start, end)[0]!;
     this.words = line.words.slice(0, 4);
     const prev = lyrics.lines[line.i - 1];
-    this.prevWord = prev ? prev.words[prev.words.length - 1]!.w : '';
+    this.prevWord = prev ? plain(prev.words[prev.words.length - 1]!.w) : ''; // typed (mono): typewriter quotes
     this.ws = this.words.map((w) => w.start);
     const wP = this.words[3] ?? this.words[this.words.length - 1]!;
     this.tP = wP.start;
@@ -219,7 +221,7 @@ export default class Hook extends Scene {
     const t0 = this.ws[0]!;
     const k = prog(t, this.ctx.start, t0);
     const fam = this.f.im, size = 1150;
-    const w = measure("I'M", fam, size);
+    const w = measure('I’M', fam, size);
     c.save();
     c.translate(W / 2, H / 2);
     c.rotate(-0.12 * (1 - k * k));
@@ -229,7 +231,7 @@ export default class Hook extends Scene {
       c.save(); c.scale(sc, sc);
       c.strokeStyle = rgba(j % 2 ? 'signal' : 'bone', 0.5 * sc);
       c.lineWidth = 2 / sc;
-      c.strokeText("I'M", -w / 2, (size * CAP) / 2);
+      c.strokeText('I’M', -w / 2, (size * CAP) / 2);
       c.restore();
     }
     c.restore();
@@ -252,7 +254,7 @@ export default class Hook extends Scene {
   private drawIM(c: CanvasRenderingContext2D, t: number, ink: Col) {
     const n = this.n, t0 = this.ws[0]!;
     const fam = this.f.im;
-    const w1 = measure("I'M", fam, 100) / 100;
+    const w1 = measure('I’M', fam, 100) / 100;
     const size = Math.min(n === 1 ? 980 : 1200, (W - 150) / w1);
     const s = this.slam(t, t0, n === 4 ? 0.3 : 0.16);
     const w = w1 * size;
@@ -261,10 +263,10 @@ export default class Hook extends Scene {
     c.save();
     c.translate(W / 2, base);
     c.scale(s, s);
-    if (n === 4) this.echoes(c, "I'M", fam, size, -w / 2, 0, t, t0);
+    if (n === 4) this.echoes(c, 'I’M', fam, size, -w / 2, 0, t, t0);
     c.font = font(fam, size);
     c.fillStyle = rgba(ink);
-    c.fillText("I'M", -w / 2, 0);
+    c.fillText('I’M', -w / 2, 0);
     c.restore();
   }
 
@@ -342,8 +344,10 @@ export default class Hook extends Scene {
   /** Width of the maths-set P(DOOM) at a given em size. */
   private pdWidth(size: number, hair = false) {
     const f = this.f;
-    return (measure('P', f.P, size) + size * 0.02 + measure('(', f.paren, size * 1.25) * 2 + measure('DOOM', hair ? f.hairW : f.doom, size) + size * 0.03);
+    return (measure('P', this.pFam(hair), size) + size * P_GAP + measure('(', f.paren, size * 1.25) * 2 + measure('DOOM', hair ? f.hairW : f.doom, size) + size * 0.03);
   }
+  /** The P of P(DOOM): bold italic, or the light italic for the hairline variant. */
+  private pFam(hair: boolean) { return hair ? F.archivoItalic(100, 400) : this.f.P; }
   /**
    * P(DOOM) set like a maths expression: italic P, hairline stretched delimiters, heavy DOOM.
    * Anchored at the left baseline. `lit` (0..1) karaoke for "DOOM)".
@@ -351,10 +355,9 @@ export default class Hook extends Scene {
   private drawPD(c: CanvasRenderingContext2D, x: number, base: number, size: number, ink: Col, lit: number, hair = false, doomCol?: string) {
     const f = this.f;
     c.fillStyle = rgba(ink);
-    c.font = font(hair ? f.hair : f.P, size);
-    if (hair) c.font = font(F.archivoItalic(100, 400), size);
+    c.font = font(this.pFam(hair), size);
     c.fillText('P', x, base);
-    x += measure('P', hair ? F.archivoItalic(100, 400) : f.P, size) + size * 0.02;
+    x += measure('P', this.pFam(hair), size) + size * P_GAP;
     const psz = size * 1.25;
     c.font = font(f.paren, psz);
     c.fillText('(', x, base + psz * 0.12);
@@ -413,7 +416,7 @@ export default class Hook extends Scene {
 
   /** Hook 3: tiny hairline words in a lot of black; earlier words climb away above, fading. */
   private drawTiny(c: CanvasRenderingContext2D, t: number, wi: number, fade = 1, skip = -1) {
-    const labels = ["I'M", 'UPPING', 'MY', 'P(DOOM)'];
+    const labels = ['I’M', 'UPPING', 'MY', 'P(DOOM)'];
     const fam = this.f.hair, size = 54, track = 16, gap = 84;
     const cy = H / 2 + (size * CAP) / 2;
     for (let i = 0; i <= wi; i++) {
@@ -449,7 +452,7 @@ export default class Hook extends Scene {
     c.save();
     c.font = font(this.f.monoM, 13);
     c.letterSpacing = '3px';
-    const labels = ["I'M", 'UPPING', 'MY', 'P(DOOM)'];
+    const labels = ["I'M", 'UPPING', 'MY', 'P(DOOM)']; // mono UI legend: typewriter apostrophe
     let x = 96;
     labels.forEach((l, i) => {
       const s = `${String(i + 1).padStart(2, '0')} ${l}`;
@@ -702,7 +705,8 @@ export default class Hook extends Scene {
     for (const i of [0, 5, 10]) c.fillText((i / 10).toFixed(2), bx + (bw * i) / 10 - (i === 10 ? 30 : i === 5 ? 15 : 0), by + 26);
     c.textAlign = 'right';
     const dd = this.dNew - this.dPrev;
-    c.fillText(`Δ ${dd >= 0 ? '+' : '−'}${Math.abs(dd).toFixed(2)} · ${NOTES[n] ?? ''}`, bx + bw, by + 50);
+    // U+2206 INCREMENT: Plex Mono has it, not the Greek Δ (which would fall back to a system font)
+    c.fillText(`\u2206 ${dd >= 0 ? '+' : '−'}${Math.abs(dd).toFixed(2)} · ${NOTES[n] ?? ''}`, bx + bw, by + 50);
     c.textAlign = 'left';
     c.fillStyle = hair ? rgba('bone', 0.9) : inkSignal ? rgba('ink', 1) : rgba('signal', 1);
     c.fillRect(bx, by - (hair ? 1 : 3), bw * clamp(v) * d, hair ? 3 : 9);

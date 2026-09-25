@@ -148,7 +148,8 @@ export default class Outro extends Scene {
       if (s >= 1) {
         const typed = Math.floor(prog(s, 1, 2.2) * 60);
         c.font = font(F.mono(400), 22); c.fillStyle = rgba('ash', 0.95);
-        c.fillText('¹ Kolmogorov (1933): P(Ω) = 1.  Deprecated.'.slice(0, typed), RX, 990);
+        // Ω as U+2126 (the ohm sign): Plex Mono has it, not the Greek Ω (which would fall back to a system font)
+        c.fillText('¹ Kolmogorov (1933): P(\u2126) = 1.  Deprecated.'.slice(0, typed), RX, 990);
       }
     } else if (bar === 1) {
       // a log ruler flies past under a marker; the number, huge, top left
@@ -303,15 +304,18 @@ export default class Outro extends Scene {
     const fP = F.serif(600, true), fT = F.serif(600), fR = F.serif(400), fV = F.archivo(100, 600);
     c.save();
     const wd = (f: string, sz: number, txt: string) => { c.font = font(f, sz); return c.measureText(txt).width; };
-    const w100 = wd(fP, 100, 'P') + 2 + wd(fT, 100, '(doom)') + 14 + wd(fR, 100, '= NaN') + 40;
+    // italic P → "(": two runs, no kerning between them; the gap is set by eye (the P's bowl overhangs its advance)
+    const PGAP = 0.05;
+    const w100 = wd(fP, 100, 'P') + 100 * PGAP + wd(fT, 100, '(doom)') + 14 + wd(fR, 100, '= NaN') + 40;
     const S = Math.min(300, (100 * (W - 150 - 170 - X)) / w100);
-    const xP = X - 6, xDoom = xP + wd(fP, S, 'P') + S * 0.02;
+    const xP = X - 6, xDoom = xP + wd(fP, S, 'P') + S * PGAP;
     const xEq = xDoom + wd(fT, S, '(doom)') + S * 0.14;
     const xR = xEq + wd(fR, S, '= ');
     const line1: CardGeom['line1'] = [];
     let x = X;
-    ["I'm", 'upping', 'my'].forEach((w, wi) => {
-      Array.from(w).forEach((ch, j) => { line1.push({ ch, x: x + wd(fV, 150, w.slice(0, j)), word: wi, j }); });
+    ['I’m', 'upping', 'my'].forEach((w, wi) => {
+      // letters at their kerned positions in the word (a prefix's width would drop each letter's kern)
+      layout(w, fV, 150).glyphs.forEach((gl, j) => { line1.push({ ch: gl.ch, x: x + gl.x, word: wi, j }); });
       x += wd(fV, 150, w + ' ');
     });
     const nanW = wd(fR, S, 'NaN');

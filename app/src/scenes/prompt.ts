@@ -9,7 +9,7 @@ import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { rgba } from '../engine/palette';
-import { F, font, measure } from '../engine/type';
+import { F, font, measure, plain } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
 import { clamp, ease, hash, lerp, noise1, prog, smoothstep, TAU } from '../engine/util';
 import { sparkHead, sparkParticles, MASK } from './_motifs';
@@ -62,7 +62,9 @@ export default class Prompt extends Scene {
     const cands = lyrics.linesIn(start, end).filter((l) => l.start >= start - 0.25 && l.start < end - 0.5);
     this.line = cands[0] ?? lyrics.linesIn(start, end)[0]!;
     const words = this.line.words;
-    this.text = words.map((w) => w.w).join(' ');
+    // typed input: typewriter quotes (lyric words come with ’; a keyboard types ')
+    const typed = words.map((w) => plain(w.w));
+    this.text = typed.join(' ');
     this.adv = measure('0', this.fam, FS);
 
     // tokens
@@ -70,8 +72,9 @@ export default class Prompt extends Scene {
     let ci = 0;
     words.forEach((w, wi) => {
       if (wi > 0) ci += 1; // the space
+      const ww = typed[wi]!;
       let pieces = specs[norm(w.w)];
-      if (!pieces || pieces.map((p) => p.s).join('') !== w.w) pieces = [{ s: w.w, dist: [[w.w, 0.5], ['…', 0.12]] }];
+      if (!pieces || pieces.map((p) => p.s).join('') !== ww) pieces = [{ s: ww, dist: [[ww, 0.5], ['…', 0.12]] }];
       const syl = w.syl && w.syl.length === pieces.length ? w.syl : null;
       let off = 0;
       pieces.forEach((p, pi) => {
@@ -82,7 +85,7 @@ export default class Prompt extends Scene {
         });
         off += p.s.length;
       });
-      ci += w.w.length;
+      ci += ww.length;
     });
     this.toks.forEach((k, i) => {
       const next = this.toks[i + 1];
@@ -380,8 +383,23 @@ export default class Prompt extends Scene {
     c.letterSpacing = '0px';
     c.font = font(F.mono(400), 13);
     c.fillStyle = rgba('ash', 0.75);
-    c.fillText('⏎ send  (irreversible)', fx1, fy1 + 52);
+    const sendTxt = ' send  (irreversible)';
+    c.fillText(sendTxt, fx1, fy1 + 52);
     c.textAlign = 'left';
+    // ⏎ (not in Plex Mono): the keycap's return arrow, drawn small in the cell before "send"
+    {
+      const cell = measure(' ', F.mono(400), 13);
+      const ax = fx1 - measure(sendTxt, F.mono(400), 13) - cell * 0.5, ay = fy1 + 52 - 4.2, a = 3.4;
+      c.save();
+      c.strokeStyle = rgba('ash', 0.75);
+      c.lineWidth = 1.1;
+      c.lineCap = 'square'; c.lineJoin = 'miter';
+      c.beginPath();
+      c.moveTo(ax + a, ay - a); c.lineTo(ax + a, ay + a * 0.25); c.lineTo(ax - a, ay + a * 0.25);
+      c.moveTo(ax - a + a * 0.55, ay + a * 0.25 - a * 0.55); c.lineTo(ax - a, ay + a * 0.25); c.lineTo(ax - a + a * 0.55, ay + a * 0.25 + a * 0.55);
+      c.stroke();
+      c.restore();
+    }
     // keycap
     const press = t >= this.tEnter ? Math.pow(0.5, (t - this.tEnter) / 0.12) : 0;
     const armed = t >= this.tLast + 0.1 ? 1 : 0;
@@ -543,7 +561,10 @@ export default class Prompt extends Scene {
         if (on) { c.fillStyle = rgba('signal', 0.14 + 0.5 * flashRow); c.fillRect(1, y - 15, pw - 1, rh - 1); }
         c.font = font(F.mono(on ? 500 : 400), 14);
         c.fillStyle = on ? rgba('signal', 1) : rgba(picked ? 'ash' : 'bone', picked ? 0.8 : 0.55);
-        c.fillText((on ? '▸ ' : '  ') + txt, 8, y);
+        const cell = measure(' ', F.mono(500), 14);
+        // the pick marker (▸ is not in Plex Mono): a small triangle drawn in the first cell
+        if (on) triangle(c, 8 + cell * 0.5, y - 4.4, 3.6);
+        c.fillText('  ' + txt, 8, y);
         const bx = 160, bwm = 80;
         const bw = clamp((bwm * p) / pmax * clamp(jitter, 0, 1.2), 1.5, bwm);
         c.fillStyle = on ? rgba('signal', 1) : rgba('bone', picked ? 0.3 : 0.45);
@@ -638,6 +659,14 @@ export default class Prompt extends Scene {
     void hair;
     return head;
   }
+}
+
+/** A small right-pointing filled triangle centred at (x, y), half-height r. */
+function triangle(c: CanvasRenderingContext2D, x: number, y: number, r: number) {
+  c.beginPath();
+  c.moveTo(x - r * 0.8, y - r); c.lineTo(x + r * 0.9, y); c.lineTo(x - r * 0.8, y + r);
+  c.closePath();
+  c.fill();
 }
 
 function mixc(a: string, b: string, k: number) {

@@ -16,7 +16,7 @@ import { Scene, type Frame } from '../engine/scene';
 import { FSPass, Layer2D, W, H, SCALE, makeRT, scaleContext2D } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font, measure } from '../engine/type';
+import { F, font, measure, plain } from '../engine/type';
 import { Lyrics, type Line, type Word } from '../engine/lyrics';
 import { clamp, ease, lerp, prog, hash, mulberry32, keys, smoothstep } from '../engine/util';
 import { sparkHead, sparkHead2D, sparkParticles } from './_motifs';
@@ -64,7 +64,7 @@ export default class Loom extends Scene {
   room!: IlyaRoom;
   roomRT = makeRT(W, H, { depthBuffer: false });
   T!: { start: number; end: number; s2: number; s3: number; twist: number; untwist: number; beats: number[]; b1: number; b2: number; b3: number };
-  context = "…I'm upping my P(doom)";
+  context = '…I’m upping my P(doom)'; // the lyric it continues (display punctuation, like the ellipsis)
 
   override init() {
     const { lyrics: ly, audio: au, start, end } = this.ctx;
@@ -374,7 +374,7 @@ export default class Loom extends Scene {
         if (p > 0 && (!nextW || t < nextW.start || ri < rows.length - 1 && ws.indexOf(w) === ws.length - 1)) {
           c.font = font(F.mono(400), 16);
           c.fillStyle = rgba('ash', 0.9);
-          c.fillText(`[MASK] → ${w.w.toLowerCase()}  p=${(0.62 + 0.37 * hash(w.gi, 2)).toFixed(2)}`, x, by - 10);
+          c.fillText(`[MASK] → ${plain(w.w.toLowerCase())}  p=${(0.62 + 0.37 * hash(w.gi, 2)).toFixed(2)}`, x, by - 10);
         }
         x += tw + size * 0.3;
       }

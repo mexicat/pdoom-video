@@ -8,7 +8,7 @@ import { Scene, type Frame } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font } from '../engine/type';
+import { F, font, layout } from '../engine/type';
 import { Lyrics, type Word } from '../engine/lyrics';
 import { clamp, ease, hash, lerp, prog, pulse, smoothstep, springStep, TAU } from '../engine/util';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -141,22 +141,28 @@ export default class Stack extends Scene {
       }
     }
 
-    // DISOBEY as individual letters (they break rank)
+    // DISOBEY as individual letters (they break rank), set on the font's own spacing and kerning
+    // (rounds sit closer than straights: a constant gap between the ink boxes left S–O and O–B loose),
+    // tracked about as tight as before, the inks of E–Y kept a hairline apart
     {
       const fam = F.archivo(75, 900);
       const text = this.disobey.w.replace(/[^A-Za-z]/g, '').toUpperCase();
-      const capH = 2.3;
-      let x = 0;
+      const capH = 2.3, minGap = capH * 0.04;
+      const lay = layout(text, fam, 100, -0.03 * 100);
+      let shift = 0, right = -Infinity;
       const pl: TextPlane[] = [];
-      for (const ch of text) {
+      Array.from(text).forEach((ch, i) => {
         const tp = new TextPlane(ch, fam, { capH, px: 300, ax: 0, ay: 0.5, outline: 0.022 });
         pl.push(tp);
+        const xl = (lay.glyphs[i]!.x / 100) * tp.em + tp.inkX;
+        const x = Math.max(xl + shift, right + minGap);
+        shift = x - xl;
+        right = x + tp.w;
         this.disobeyGlyphX.push(x);
-        x += tp.w + capH * 0.05;
         this.text3.add(tp.mesh);
-      }
-      const tot = x - capH * 0.05;
-      this.disobeyGlyphX = this.disobeyGlyphX.map((v) => v - tot / 2);
+      });
+      const x0 = this.disobeyGlyphX[0]!, tot = right - x0;
+      this.disobeyGlyphX = this.disobeyGlyphX.map((v) => v - x0 - tot / 2);
       this.disobeyLetters = pl;
     }
     // giant curly quotes
@@ -324,7 +330,7 @@ export default class Stack extends Scene {
     label('TRANSFORMER BLOCK', -HX + 0.55, HY - 0.55, 0.17, C_ASH, 0.9, true);
     label('D_MODEL 12288', 4.0, -1.0, 0.12, C_GRAPH, 1, true);
     label('HEADS 96', 4.0, -1.35, 0.12, C_GRAPH, 1, true);
-    label('FFN 4X', 4.0, 0.75, 0.12, C_GRAPH, 1, true);
+    label('FFN 4×', 4.0, 0.75, 0.12, C_GRAPH, 1, true);
     label('PRE-LN', 4.0, 1.1, 0.12, C_GRAPH, 1, true);
     // registration crosses
     for (const [x, y] of [[-HX + 0.55, -HY + 0.55], [HX - 0.55, -HY + 0.55], [HX - 0.55, HY - 0.55]] as const) {
@@ -705,11 +711,41 @@ export default class Stack extends Scene {
       c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(a.x + 60, a.y - 40); c.lineTo(a.x + 250, a.y - 40); c.stroke();
       c.font = font(F.mono(500), 22);
       const deg = Math.abs(d.yaw * 180 / Math.PI);
-      c.fillText(`Δθ = ${deg.toFixed(1)}°`, a.x + 66, a.y - 50);
+      drawDeltaTheta(c, a.x + 66, a.y - 50, 22);
+      c.fillText(` = ${deg.toFixed(1)}°`, a.x + 66 + 2 * c.measureText('0').width, a.y - 50);
       c.font = font(F.mono(400), 14);
       c.fillStyle = rgba('bone', 0.7);
       c.fillText('MISALIGNED (1 of ∞)', a.x + 66, a.y - 18);
       c.restore();
     }
   }
+}
+
+/**
+ * "Δθ" drawn in two cells of IBM Plex Mono Medium at `em` px, baseline at y: the font has no Greek, and the
+ * system fallback is lighter (and differs from machine to machine). Uses the current fillStyle.
+ */
+function drawDeltaTheta(c: CanvasRenderingContext2D, x: number, y: number, em: number) {
+  const st = 0.118 * em, sh = 0.093 * em; // stem, horizontal stroke (Plex Mono Medium's O)
+  // Δ: a cap-height triangle, the counter inset by the stem
+  const P = [[0.045, 0], [0.555, 0], [0.3, -0.698]].map(([u, v]) => [x + u! * em, y + v! * em] as const);
+  const side = (i: number) => Math.hypot(P[(i + 1) % 3]![0] - P[(i + 2) % 3]![0], P[(i + 1) % 3]![1] - P[(i + 2) % 3]![1]);
+  const [la, lb, lc] = [side(0), side(1), side(2)], per = la + lb + lc;
+  const ix = (la * P[0]![0] + lb * P[1]![0] + lc * P[2]![0]) / per, iy = (la * P[0]![1] + lb * P[1]![1] + lc * P[2]![1]) / per;
+  const r = y - iy, k = (r - 0.105 * em) / r; // inradius (the base lies on the baseline); diagonals a touch lighter than stems
+  c.beginPath();
+  P.forEach(([px, py], i) => (i ? c.lineTo(px, py) : c.moveTo(px, py)));
+  c.closePath();
+  P.forEach(([px, py], i) => (i ? c.lineTo(ix + (px - ix) * k, iy + (py - iy) * k) : c.moveTo(ix + (px - ix) * k, iy + (py - iy) * k)));
+  c.closePath();
+  c.fill('evenodd');
+  // θ: an ascender-high oval with a bar across the middle
+  const cx = x + 0.9 * em, cy = y - 0.365 * em, rx = 0.232 * em, ry = 0.377 * em;
+  // one path, nonzero: the counter winds the other way; the bar overlaps the ring (no seam, no double alpha)
+  c.beginPath();
+  c.ellipse(cx, cy, rx, ry, 0, 0, TAU);
+  c.moveTo(cx + rx - st, cy);
+  c.ellipse(cx, cy, rx - st, ry - sh, 0, TAU, 0, true);
+  c.rect(cx - rx + st * 0.5, cy - sh * 0.5, 2 * rx - st, sh);
+  c.fill('nonzero');
 }

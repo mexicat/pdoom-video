@@ -9,7 +9,7 @@ import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { Layer2D, W, H, makeRT } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, textPath2D } from '../engine/type';
+import { F, font, glyphX, layout, textPath2D } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
 import { clamp, ease, hash, keys, lerp, mulberry32, prog, pulse, TAU } from '../engine/util';
 import { makeEyePass, EYE } from './ascent-eye';
@@ -428,7 +428,7 @@ export default class Ascent extends Scene {
       };
       note(12, '← still log scale');
       note(19, '← yes, still log scale');
-      note(24, '← analysts: "fair value"');
+      note(24, '← analysts: “fair value”');
       note(27, '← we checked the axis');
       const tt = S(-1640, 6.4 * DEC);
       c.font = font(F.mono(600), 26 * z); c.fillStyle = rgba('ink', 0.85);
@@ -677,14 +677,16 @@ export default class Ascent extends Scene {
     c.textBaseline = 'alphabetic';
     const drawRow = (ws: Word[], y: number) => {
       c.font = font(fam, size);
-      const total = c.measureText(ws.map((w) => w.w).join(' ')).width;
-      let x = -total / 2;
+      const row = ws.map((w) => w.w).join(' ');
+      const total = c.measureText(row).width;
+      // each word drawn on its own (own colour) at its kerned position in the row set as one run
+      let k = 0;
       for (const w of ws) {
         const p = Lyrics.wordProgress(w, t);
         const vis = prog(t, w.start - 0.35, w.start);
         c.fillStyle = p > 0 ? (p < 1 ? rgba('ember', 1) : rgba('bone', 1)) : rgba('bone', 0.2 * vis);
-        c.fillText(w.w, x, y);
-        x += c.measureText(w.w + ' ').width;
+        c.fillText(w.w, -total / 2 + glyphX(row, k, fam, size), y);
+        k += Array.from(w.w).length + 1;
       }
     };
     drawRow(rowA, -86);
@@ -820,7 +822,9 @@ export default class Ascent extends Scene {
       c.fillStyle = gp > 0 ? rgba('bone', 0.85) : rgba('ash', 0.3);
       c.fillText(gl, x + 4, yN + 44);
       if (gp > 0 && gp < 1) { c.fillStyle = rgba('signal', 1); c.fillRect(x + 4, yN + 52, c.measureText(gl).width * gp, 2); }
-      x += tw + (i === 2 ? 44 : 18);
+      // token gaps: a word space after "30"; FLOP→/s tightened by eye (the font has no P/ kern, and
+      // the P's open foot plus the slash's lean leave a hole that reads wider than the other gaps)
+      x += tw + (i === 2 ? 44 : i === 3 ? 12 : 18);
     }
     // footnote marker + footnote typed after the lock
     if (t > tL) {

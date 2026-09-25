@@ -11,7 +11,7 @@ import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { W, H, clearRT, Layer2D } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, type TextLayout } from '../engine/type';
+import { F, font, layout, plain, type TextLayout } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
 import { GLSL_COMMON } from '../engine/glsl/common';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -861,7 +861,7 @@ export default class LossScene extends Scene {
         c.fillStyle = rgba('bone', 0.9 * an);
         c.fillText('grokking (?)', p.x, p.y);
         c.fillStyle = rgba('ash', 0.9 * an);
-        c.fillText('Δloss −99.9999%', p.x, p.y + fs * 1.3);
+        c.fillText('\u2206loss −99.9999%', p.x, p.y + fs * 1.3); // U+2206 INCREMENT (Plex Mono has no Greek Δ)
       }
     }
     c.restore();
@@ -978,7 +978,8 @@ export default class LossScene extends Scene {
       for (const w of words) {
         const p = Lyrics.wordProgress(w, t);
         if (p <= 0) break;
-        s += (s ? ' ' : '') + w.w.slice(0, Math.ceil(p * w.w.length));
+        const ww = plain(w.w); // typed into a terminal (mono, cursor): typewriter apostrophes
+        s += (s ? ' ' : '') + ww.slice(0, Math.ceil(p * ww.length));
       }
       s = s.toUpperCase();
       c.fillStyle = rgba('bone', 0.9 * alpha);

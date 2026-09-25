@@ -17,7 +17,7 @@ import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { FSPass, Layer2D, W, H } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
-import { F, font, layout, textPoints, type TextLayout } from '../engine/type';
+import { F, font, layout, measure, textPoints, type TextLayout } from '../engine/type';
 import { norm, type Line, type Word } from '../engine/lyrics';
 import { strokeText, type StrokeText } from '../engine/stroke';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -406,9 +406,15 @@ export default class SpacetimeScene extends Scene {
     c.textAlign = 'right';
     c.fillStyle = rgba('bone', 0.75 * a);
     c.fillText(`M  ${(60000 / bpm / 4).toFixed(1)} ms/div`, W - 96, 92);
-    const trig = but > 0 ? (blink ? 'NO SIGNAL' : '') : "TRIG'D  ▲ CH1";
+    const trig = but > 0 ? (blink ? 'NO SIGNAL' : '') : "TRIG'D    CH1";
     c.fillStyle = but > 0 ? rgba('signal', a) : rgba('ash', 0.8 * a);
     c.fillText(trig, W - 96, 120);
+    if (but <= 0) {
+      // ▲ (not in Plex Mono): a small triangle drawn in the blank cell before "CH1"
+      const cell = c.measureText(' ').width;
+      const tx = W - 96 - c.measureText(' CH1').width - cell + (cell - 2) / 2;
+      c.beginPath(); c.moveTo(tx - 5.2, 120); c.lineTo(tx + 5.2, 120); c.lineTo(tx, 120 - 9.4); c.closePath(); c.fill();
+    }
     // the run's own vital sign, calm, ticking down
     if (but <= 0) {
       const loss = 0.0213 - 0.0009 * prog(t, this.T0, this.tBut);
@@ -827,7 +833,7 @@ export default class SpacetimeScene extends Scene {
     const R = 6.2;
     const size = 1.25; // em in world units
     // glyph widths grow from 62 to 125 as each glyph is sung (only the two long words stretch)
-    const glyphs: { ch: string; adv: number; width: number; k: number; tg: number }[] = [];
+    const glyphs: { ch: string; adv: number; width: number; k: number; tg: number; fam: string; sf: number }[] = [];
     ws.forEach((w, wi) => {
       const stretch = wi >= 2;
       const n = w.w.length;
@@ -836,14 +842,22 @@ export default class SpacetimeScene extends Scene {
         const k = stretch ? prog(t, tg, tg + 0.35, ease.outCubic) : 1;
         const width = stretch ? lerp(62, 125, k) : 100;
         const fam = F.archivo(width, 900);
-        const adv = layout(w.w[j]!.toUpperCase(), fam, 100).width / 100 * size * (stretch ? lerp(0.62, 1.25, k) / (nearestW(width) / 100) : 1);
-        glyphs.push({ ch: w.w[j]!.toUpperCase(), adv, width, k, tg });
+        const sf = stretch ? lerp(0.62, 1.25, k) / (nearestW(width) / 100) : 1;
+        const adv = layout(w.w[j]!.toUpperCase(), fam, 100).width / 100 * size * sf;
+        glyphs.push({ ch: w.w[j]!.toUpperCase(), adv, width, k, tg, fam, sf });
       }
-      if (wi < ws.length - 1) glyphs.push({ ch: ' ', adv: size * 0.42, width: 100, k: 1, tg: w.end });
+      if (wi < ws.length - 1) glyphs.push({ ch: ' ', adv: size * 0.42, width: 100, k: 1, tg: w.end, fam: F.archivo(100, 900), sf: 1 });
     });
+    // glyphs are set one by one (each in its own width instance): add the font's kerning between
+    // neighbours (YO, AT, AC…), the pair's kern averaged over the two glyphs' instances
     let s = 0;
     const pos: number[] = [];
-    for (const g of glyphs) { pos.push(s); s += g.adv; }
+    glyphs.forEach((g, i) => {
+      pos.push(s);
+      s += g.adv;
+      const n = glyphs[i + 1];
+      if (n && g.ch !== ' ' && n.ch !== ' ') s += 0.5 * (kern100(g.ch, n.ch, g.fam) * g.sf + kern100(g.ch, n.ch, n.fam) * n.sf) / 100 * size;
+    });
     let head = 0;
     glyphs.forEach((g, i) => { if (t >= g.tg) head = pos[i]! + g.adv * clamp((t - g.tg) / 0.12); });
     const cp = this.cam.position;
@@ -951,6 +965,18 @@ export default class SpacetimeScene extends Scene {
   override render(f: Frame, out: THREE.WebGLRenderTarget): PostOverrides {
     return f.t < this.tM3 ? this.renderLens(f, out) : this.renderSheet(f, out);
   }
+}
+
+const kernCache = new Map<string, number>();
+/** The font's kerning (px at 100 px) between glyphs a and b: the pair set as one run minus the two set apart. */
+function kern100(a: string, b: string, fam: string) {
+  const key = `${fam}|${a}${b}`;
+  let v = kernCache.get(key);
+  if (v === undefined) {
+    v = measure(a + b, fam, 100) - measure(a, fam, 100) - measure(b, fam, 100);
+    kernCache.set(key, v);
+  }
+  return v;
 }
 
 /** Archivo static width instance nearest to a requested width (percent). */

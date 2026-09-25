@@ -545,7 +545,10 @@ export default class Room extends Scene {
       if (ri > 0) y += size * 0.86;
       const fam = F.archivo(wd, wt);
       c.font = font(fam, size);
-      let xx = x;
+      // hanging punctuation: a leading ’ sits in the margin so the row's letters align with the stack
+      const first = words[idx[0]!]!.w.replace(/^'/, '’').toUpperCase();
+      const hang = /^[’‘“]/.test(first) ? c.measureText(first).width - c.measureText(first.slice(1)).width : 0;
+      let xx = x - hang;
       for (const wi of idx) {
         const w = words[wi]!;
         const txt = w.w.replace(/^'/, '’').toUpperCase();
@@ -632,7 +635,7 @@ export default class Room extends Scene {
     c.fillText(String(n).padStart(4, '0'), x, 158);
     c.font = font(F.mono(400), 14);
     c.fillStyle = rgba('ash', 0.7);
-    c.fillText(`n(t) = 2^⌊t/♪⌋   k = ${g}`, x, 186);
+    c.fillText(`n(t) = 2^floor(t/beat)   k = ${g}`, x, 186);
     c.restore();
   }
 
@@ -1239,7 +1242,7 @@ export default class Room extends Scene {
     const items: Item[] = [];
     // back wall labels
     const wallUx: V3 = [1, 0, 0], wallUy: V3 = [0, -1, 0];
-    const label = (x: number, y: number, txt: string, fam: string, sizeM: number, fill: string) => {
+    const label = (x: number, y: number, txt: string, fam: string, sizeM: number, fill: string, arrowDown = false) => {
       const P: V3 = [x, y, -RD + 0.01];
       items.push({ z: this.depth(cam, P[0], P[1], P[2]), draw: (c) => {
         const m = sizeM / 20;
@@ -1250,9 +1253,14 @@ export default class Room extends Scene {
         c.setTransform(A.a, A.b, A.c, A.d, A.e, A.f);
         c.fillStyle = fill;
         c.fillText(txt, 0, 0);
+        if (arrowDown) {
+          // ▾ (not in Plex Mono): a small triangle drawn in the label's last (blank) cell
+          const cx = wpx - wpx / Array.from(txt).length / 2;
+          c.beginPath(); c.moveTo(cx - 3.9, -9.6); c.lineTo(cx + 3.9, -9.6); c.lineTo(cx, -1.6); c.closePath(); c.fill();
+        }
       } });
     };
-    label(0, 2.1, 'OUT ▾', F.mono(500), 0.075, rgba('bone', 0.65));
+    label(0, 2.1, 'OUT  ', F.mono(500), 0.075, rgba('bone', 0.65), true);
     label(2.0, 2.24, 'EXIT', F.mono(500), 0.075, rgba('bone', 0.65));
     label(2.0, 2.155, '(DECORATIVE)', F.mono(500), 0.06, rgba('signal', 0.85));
     // cards

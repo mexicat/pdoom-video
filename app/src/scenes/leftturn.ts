@@ -18,7 +18,7 @@ import { Scene, type Frame, type PostOverrides } from '../engine/scene';
 import { W, H } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { rgba } from '../engine/palette';
-import { F, font } from '../engine/type';
+import { F, font, layout } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
 import { clamp, ease, keys, lerp, prog, pulse } from '../engine/util';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -354,22 +354,21 @@ export default class LeftTurn extends Scene {
   /** Terra incognita, lettered along the upper rim of the unplanned object (a map label). */
   drawTerrain(c: CanvasRenderingContext2D) {
     c.save();
-    c.font = font(F.serif(400, true), 84);
+    const fam = F.serif(400, true), size = 84;
+    c.font = font(fam, size);
     c.fillStyle = rgba('ash', 0.75);
     c.textAlign = 'center';
-    const label = 'Terra incognita';
+    const lay = layout('Terra incognita', fam, size);
     const R = FACE.r * 0.8;
-    const wTot = c.measureText(label).width;
-    let a = -Math.PI / 2 - (wTot / R) / 2;
-    for (const ch of label) {
-      const cw = c.measureText(ch).width;
-      const am = a + cw / 2 / R;
+    const a0 = -Math.PI / 2 - (lay.width / R) / 2;
+    // glyphs at their kerned positions along the arc (the T–e kern tucks the e under the T's arm)
+    for (const g of lay.glyphs) {
+      const am = a0 + (g.x + g.w / 2) / R;
       c.save();
       c.translate(FACE.x + Math.cos(am) * R, FACE.y + Math.sin(am) * R);
       c.rotate(am + Math.PI / 2);
-      c.fillText(ch, 0, 0);
+      c.fillText(g.ch, 0, 0);
       c.restore();
-      a += cw / R;
     }
     c.restore();
   }
