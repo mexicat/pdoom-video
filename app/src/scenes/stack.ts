@@ -10,7 +10,7 @@ import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
 import { F, font, layout } from '../engine/type';
 import { Lyrics, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, prog, pulse, smoothstep, springStep, TAU } from '../engine/util';
+import { clamp, ease, hash, lerp, prog, pulse, smoothstep, springStep, TAU, frameIdx } from '../engine/util';
 import { sparkHead, sparkParticles } from './_motifs';
 import { TextPlane, beatsIn, lin, strokeLines, type RGB } from './stack-kit';
 import { PDoom, formatPDoom } from '../engine/hud';
@@ -427,8 +427,8 @@ export default class Stack extends Scene {
     let shx = 0, shy = 0;
     if (!stopped) {
       const kk = this.landPulse(t);
-      shx = (hash(Math.floor(t * 60), 1) - 0.5) * kk * 0.12;
-      shy = (hash(Math.floor(t * 60), 2) - 0.5) * kk * 0.12;
+      shx = (hash(frameIdx(t), 1) - 0.5) * kk * 0.12;
+      shy = (hash(frameIdx(t), 2) - 0.5) * kk * 0.12;
     }
     const focus = new THREE.Vector3(fx + shx, -posNow * P + fyOff + shy, 0);
     cam.fov = fov;

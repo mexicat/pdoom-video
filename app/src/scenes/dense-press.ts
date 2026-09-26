@@ -15,7 +15,7 @@ import { F, font, layout, type TextLayout } from '../engine/type';
 import type { Line, Word } from '../engine/lyrics';
 import type { AudioData } from '../engine/audio';
 import type { PostOverrides } from '../engine/scene';
-import { clamp, ease, hash, lerp, prog, pulse, springStep } from '../engine/util';
+import { clamp, ease, hash, lerp, prog, pulse, springStep, frameIdx } from '../engine/util';
 import { beatsIn } from './stack-kit';
 
 export interface Rect { x0: number; y0: number; x1: number; y1: number }
@@ -156,7 +156,7 @@ export class Press {
     let hit = kickP * 0.35;
     const hw = [0.8, 0.7, 0.45, 1];
     for (let i = 0; i < 4; i++) hit = Math.max(hit, pulse(t, R[i]!, 0.07) * hw[i]!);
-    const fr = Math.floor(t * 60);
+    const fr = frameIdx(t);
     this.shake = [(hash(fr, 1) - 0.5) * 30 * hit, (hash(fr, 2) - 0.5) * 20 * hit];
     this.zoom = 1 + 0.03 * hit;
 
@@ -218,7 +218,7 @@ export class Press {
     else { c.beginPath(); c.rect(ACTION.x0, ACTION.y0, ACTION.x1 - ACTION.x0, ACTION.y1 - ACTION.y0); c.clip(); }
     this.camera(c);
     const trem = 3 * prog(t, this.kicks[3]!, this.c2, ease.inQuad) * (rel === 0 ? 1 : 0);
-    if (trem > 0) { const fr = Math.floor(t * 60); c.translate((hash(fr, 31) - 0.5) * trem, (hash(fr, 32) - 0.5) * trem); }
+    if (trem > 0) { const fr = frameIdx(t); c.translate((hash(fr, 31) - 0.5) * trem, (hash(fr, 32) - 0.5) * trem); }
     const rowsN = 9;
     // the baseline grid: every slot the leading allows, empty until copies land on it
     if (rel < 1) {
@@ -675,7 +675,7 @@ function mixCss(a: keyof typeof LIN, b: keyof typeof LIN, k: number) {
 
 /** SMPTE-style timecode of song time at 60 fps. */
 function timecode(t: number) {
-  const f = Math.floor(t * 60 + 1e-6);
+  const f = frameIdx(t);
   const s = Math.floor(f / 60), fr = f % 60;
   const p = (n: number) => String(n).padStart(2, '0');
   return `${p(Math.floor(s / 3600))}:${p(Math.floor(s / 60) % 60)}:${p(s % 60)}:${p(fr)}`;

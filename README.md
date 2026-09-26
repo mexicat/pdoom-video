@@ -51,22 +51,23 @@ The preview renders in real time on a recent Mac. The export is not real time an
 
 ```sh
 cd app
-bun scripts/render.ts video --samples 4 --shutter 0.2 --out ../out/pdoom.mp4
+bun scripts/render.ts video --samples auto --shutter 0.2 --out ../out/pdoom.mp4
 ```
 
 - **Output:** 1920×1080 at 60 fps, x264 CRF 16, AAC audio.
-- **`--samples 4`:** averages four sub-frames per frame over a short shutter, which gives temporal anti-aliasing of the fine engraved lines.
+- **Motion blur:** every frame is the average of many sub-frames spread over a short shutter (`--shutter 0.2`, a fifth of the frame time), so fast motion leaves a continuous streak instead of a few stepped copies. `--samples auto` picks the count per frame: 12 for a still frame, 36 for ordinary camera motion, 108 or 324 for whips, slams and fast zooms. It stops once more sub-frames would no longer change the image by more than `--tol` levels of 255 (default 3). `--samples N` takes a fixed N instead (`--samples 4` makes a quick draft). How it works: "Motion blur and sampling" in [`docs/ENGINE.md`](docs/ENGINE.md).
 - **Other modes:** `stills`, `sheet` (contact sheets, `--cuts` for every scene boundary), `perf`, and `plates` (regenerates `public/plates/`, the stills used by the outro's rewind montage; rerun it after changing a scene).
 
 ### 4K
 
 ```sh
 cd app
-bun scripts/render.ts video --scale 2 --samples 4 --shutter 0.2 --out ../out/pdoom-4k.mp4
+bun scripts/render.ts video --scale 2 --samples auto --shutter 0.2 --x264 aq-mode=3:rc-lookahead=30 --out ../out/pdoom-4k.mp4
 ```
 
 - **Output:** a true 3840×2160 render (not an upscale): every layer, line and shader is rendered at the physical resolution. Scenes are laid out in 1920×1080 logical pixels, so the 4K frame looks like the 1080p one, only sharper.
-- **Cost:** about 4× the 1080p render time (roughly 35–40 minutes for the whole song at `--samples 4` on an M5 Pro). Headless Chrome uses about 4.5 GB. The film grain is rendered per 4K pixel, which is expensive to encode: at the default CRF 16 the file runs at about 660–700 Mbit/s (about 13 GB for the song, 8× the 1080p file), `--crf 18` gives about 420 Mbit/s and `--crf 20` about 230 Mbit/s.
+- **Cost:** GPU-bound. A frame takes from about 40 ms (a still frame) to over 10 s (the ray-marched rooms at 108–324 sub-frames). The whole song took about 2.5 hours on an M5 Pro, rendered as segments in two parallel pipelines (`--from`/`--to`, then a lossless concat). Each pipeline uses about 5 GB for headless Chrome plus about 4 GB for ffmpeg; the shorter x264 lookahead above keeps ffmpeg's memory down.
+- **Encoding:** the film grain is rendered per 4K pixel, which is expensive to encode: at the default CRF 16 the file runs at about 670 Mbit/s (13 GB for the song, 8× the 1080p file), `--crf 18` gives about 450 Mbit/s and `--crf 20` about 230 Mbit/s.
 - `--scale 2` works with every mode. `stills` then saves full-resolution PNGs, and `perf` measures 4K frame times. In the browser preview, add `&scale=2` to the URL.
 
 ## Regenerate the timing data

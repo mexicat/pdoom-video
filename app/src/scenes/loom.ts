@@ -13,7 +13,7 @@
 //    FIG. 14's first shot, rendered live — the dive lands exactly on the cut.
 import * as THREE from 'three';
 import { Scene, type Frame } from '../engine/scene';
-import { FSPass, Layer2D, W, H, SCALE, makeRT, scaleContext2D } from '../engine/gl';
+import { FSPass, Layer2D, W, H, SCALE, SS_TAP, makeRT, scaleContext2D } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
 import { F, font, measure, plain } from '../engine/type';
@@ -44,7 +44,7 @@ const CORPUS = [
 
 export default class Loom extends Scene {
   droste = new FSPass(FRAG_DROSTE, {
-    res: { value: new THREE.Vector2(W * SCALE, H * SCALE) }, time: { value: 0 }, // physical: supersample offsets and texture footprints
+    res: { value: new THREE.Vector2(W * SCALE, H * SCALE) }, time: { value: 0 }, ssTap: SS_TAP, // res physical: supersample offsets and texture footprints
     src: { value: null }, s: { value: 3 }, zoom: { value: 0 }, twist: { value: 0 }, spin: { value: 0 },
     term: { value: null }, termLevel: { value: TERM_LEVEL },
     atlas: { value: null }, atlasRows: { value: ATLAS_ROWS }, labelRect: { value: new THREE.Vector4() },

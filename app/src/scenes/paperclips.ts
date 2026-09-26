@@ -7,7 +7,7 @@
 //     the shrinking slot at the horizon (Archivo width 62), squeezed until the slot is a single line.
 import * as THREE from 'three';
 import { Scene, type Frame } from '../engine/scene';
-import { FSPass, Layer2D, W, H } from '../engine/gl';
+import { FSPass, Layer2D, W, H, SS_TAP } from '../engine/gl';
 import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
 import { F, font, layout, plain } from '../engine/type';
@@ -54,7 +54,7 @@ interface Times {
 
 const camUniforms = () => ({
   camPos: { value: new THREE.Vector3() }, camR: { value: new THREE.Vector3() }, camU: { value: new THREE.Vector3() }, camF: { value: new THREE.Vector3() },
-  focal: { value: FOCAL }, res: { value: new THREE.Vector2(W, H) }, time: { value: 0 },
+  focal: { value: FOCAL }, res: { value: new THREE.Vector2(W, H) }, time: { value: 0 }, ssTap: SS_TAP,
   keyDir: { value: new THREE.Vector3() }, keyI: { value: 1 }, rimDir: { value: new THREE.Vector3() }, rimI: { value: 1 },
   lampPos: { value: new THREE.Vector3() }, lampI: { value: 0 },
   fillT: { value: -1 }, groupHalf: { value: new THREE.Vector2(80, 80) },

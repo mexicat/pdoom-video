@@ -22,7 +22,7 @@ import { rgba } from '../engine/palette';
 import { F, font, layout, measure } from '../engine/type';
 import { Lyrics, type Line, type Word } from '../engine/lyrics';
 import { PDoom, formatPDoom, drawReadout } from '../engine/hud';
-import { clamp, lerp, ease, prog, springStep, pulse, hash, TAU } from '../engine/util';
+import { clamp, lerp, ease, prog, springStep, pulse, hash, TAU, frameIdx } from '../engine/util';
 import { GBUF_FRAG, COMP_FRAG, NK, NT, NE } from './shoggoth-glsl';
 import { SHROOMS, SHROOMS_FAM, shroomsAffine } from './room-shrooms';
 
@@ -725,7 +725,7 @@ export default class Shoggoth extends Scene {
     if (t > pt - 0.02 && t < this.tCollapse) {
       const v = this.pdoom.value(t);
       const age = t - pt;
-      const on = age < 0 ? 0 : age < 0.1 && hash(Math.floor(t * 60), 3) < 0.4 ? 0.35 : 1;
+      const on = age < 0 ? 0 : age < 0.1 && hash(frameIdx(t), 3) < 0.4 ? 0.35 : 1;
       c.save();
       c.globalAlpha *= on;
       drawReadout(c, 130, H - 120, v, { scale: 0.8 });
@@ -779,7 +779,7 @@ export default class Shoggoth extends Scene {
     let s = lerp(1.35, 1, pop);
     let a = clamp(age / 0.05);
     // flicker on appear
-    if (age < 0.12 && hash(Math.floor(t * 60), name.length) < 0.35) a *= 0.3;
+    if (age < 0.12 && hash(frameIdx(t), name.length) < 0.35) a *= 0.3;
     if (tClose > 0 && t > tClose) { const k = clamp((t - tClose) / 0.18); s *= 1 - ease.inCubic(k) * 0.9; a *= 1 - k; }
     if (a <= 0) return;
     const x0 = cx - hw * s, x1 = cx + hw * s, y0 = cy - hh * s, y1 = cy + hh * s;

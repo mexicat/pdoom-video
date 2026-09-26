@@ -3,6 +3,16 @@
 import * as THREE from 'three';
 import { FSPass, makeRT, W, H, SCALE } from './gl';
 
+/** The tone shoulder (linear HDR -> 0..1 linear), shared with the engine's sampling error estimate. */
+export const SHOULDER_GLSL = /* glsl */ `
+vec3 shoulder(vec3 x) {
+  // identity below k, smooth exponential shoulder above; very bright values desaturate toward white
+  const float k = 0.72;
+  vec3 y = mix(x, k + (1.0 - k) * (1.0 - exp(-(x - k) / (1.0 - k))), step(k, x));
+  float over = max(max(x.r, x.g), x.b);
+  return mix(y, vec3(1.0), smoothstep(2.0, 12.0, over) * 0.85);
+}`;
+
 export interface PostParams {
   exposure: number;
   bloom: number; // bloom strength
@@ -115,13 +125,7 @@ ${SCALE === 1 ? `        c += texture(src, vUv + texel * vec2(-1, -1)).rgb; c +=
       uniform sampler2D src; uniform sampler2D bloomTex; uniform sampler2D haloTex; uniform sampler2D hudTex;
       uniform float exposure, bloom, halation, ca, grain, vignette, hud, fade, flash, time, zoom, invert;
       uniform vec2 shake; uniform vec2 res;
-      vec3 shoulder(vec3 x) {
-        // identity below k, smooth exponential shoulder above; very bright values desaturate toward white
-        const float k = 0.72;
-        vec3 y = mix(x, k + (1.0 - k) * (1.0 - exp(-(x - k) / (1.0 - k))), step(k, x));
-        float over = max(max(x.r, x.g), x.b);
-        return mix(y, vec3(1.0), smoothstep(2.0, 12.0, over) * 0.85);
-      }
+      ${SHOULDER_GLSL}
       void main() {
         vec2 uv = (vUv - 0.5) / zoom + 0.5 - shake / res;
         vec2 dc = uv - 0.5;

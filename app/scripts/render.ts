@@ -5,7 +5,8 @@
 //   plates:  bun scripts/render.ts plates   (renders one representative JPEG per plate into public/plates/ (used by the outro's rewind), times from plates.json or entry midpoints)
 //   perf:    bun scripts/render.ts perf --from 20 --to 25 [--only ids] [--samples 1] [--shutter 0.5]   (avg ms per frame incl. GPU sync and the export's pixel readback)
 //   video:   bun scripts/render.ts video [--from 0] [--to 156.65] [--fps 60] [--crf 16] [--x264 aq-mode=3] [--samples 1] [--shutter 0.5] [--out ../out/pdoom.mp4] [--noaudio]
-//            --samples N averages N sub-frames per frame over shutter×(1/fps): motion blur + temporal AA
+//            --samples N averages N sub-frames per frame over shutter×(1/fps): motion blur + temporal AA;
+//            --samples auto picks the count per frame (4, 12, 36, 108 or 324, see Engine.render)
 //   --scale N (all modes): render at N× the 1920x1080 layout (--scale 2 = true 3840x2160); stills are then saved
 //            full-res from the pixel buffer, videos are encoded at the physical size.
 // Uses the Vite dev server at --url (default http://localhost:5173); starts a private one if unreachable.
@@ -20,6 +21,11 @@ const flag = (k: string) => argv.includes(`--${k}`);
 const APP = path.resolve(import.meta.dir, '..');
 const SCALE = Math.max(1, Math.round(+opt('scale', '1')!));
 const OW = 1920 * SCALE, OH = 1080 * SCALE; // output size
+// --samples N (fixed) or --samples auto [--min-samples 4] [--max-samples 324] [--tol 3] (adaptive, see Engine.render)
+const SAMPLES = opt('samples', '1') === 'auto'
+  ? { min: +opt('min-samples', '4')!, max: +opt('max-samples', '324')!, tol: +opt('tol', '3')! }
+  : +opt('samples', '1')!;
+const hist = (h: Record<string, number>) => Object.entries(h).sort((a, b) => +a[0] - +b[0]).map(([k, v]) => `${k}:${v}`).join(' ');
 const ROOT = path.resolve(APP, '..');
 
 async function reachable(url: string) {
@@ -63,8 +69,9 @@ async function stills(page: Page, times: number[], outDir: string) {
   mkdirSync(outDir, { recursive: true });
   const files: string[] = [];
   for (const t of times) {
-    await page.evaluate(([t, s, sh]) => (window as any).__pdoom.still(t, s, sh), [t, +opt('samples', '1')!, +opt('shutter', '0.5')!]);
+    const k: number = await page.evaluate(([t, s, sh]) => (window as any).__pdoom.still(t, s, sh), [t, SAMPLES, +opt('shutter', '0.5')!] as const);
     const f = path.join(outDir, `f_${t.toFixed(2).padStart(7, '0')}.png`);
+    if (typeof SAMPLES !== 'number') console.log(`t=${t}: ${k} sub-frames`);
     // at scale > 1 the canvas is shown downscaled on the page: save the full-res pixel buffer instead
     if (SCALE !== 1) await Bun.write(f, Buffer.from(await page.evaluate(() => (window as any).__pdoom.png()), 'base64'));
     else await page.screenshot({ path: f, clip: { x: 0, y: 0, width: 1920, height: 1080 } });
@@ -125,13 +132,14 @@ async function video(page: Page, from: number, to: number, fps: number, out: str
       },
     },
   });
-  await page.evaluate((o) => (window as any).__pdoom.stream(o), { from, to, fps, ws: `ws://localhost:${server.port}`, samples: +opt('samples', '1')!, shutter: +opt('shutter', '0.5')!, inflight: 4 });
+  const used: Record<string, number> = await page.evaluate((o) => (window as any).__pdoom.stream(o), { from, to, fps, ws: `ws://localhost:${server.port}`, samples: SAMPLES, shutter: +opt('shutter', '0.5')!, inflight: 4 });
   // wait for all frames to arrive
   while (frames < total) await Bun.sleep(20);
   ff.stdin.end();
   await ff.exited;
   server.stop();
   console.log(`\nwrote ${out} (${frames} frames in ${((performance.now() - t0) / 1000).toFixed(1)}s)`);
+  console.log(`sub-frames per frame (count:frames): ${hist(used)}`);
 }
 
 const { url, stop } = await ensureServer();
@@ -182,16 +190,18 @@ try {
       const ms: number[] = [];
       const buf = new Uint8Array(P.width * P.height * 4);
       P.still(from);
+      const used: Record<number, number> = {};
       for (let t = from; t < to; t += 1 / 60) {
         const a = performance.now();
-        P.engine.render(t, 1 / 60, false, samples, shutter);
+        const k = P.engine.render(t, 1 / 60, false, samples, shutter);
+        used[k] = (used[k] ?? 0) + 1;
         await P.engine.readPixelsAsync(buf);
         ms.push(performance.now() - a);
       }
       ms.sort((a, b) => a - b);
-      return { n: ms.length, avg: ms.reduce((a, b) => a + b, 0) / ms.length, p50: ms[ms.length >> 1], p95: ms[Math.floor(ms.length * 0.95)], max: ms[ms.length - 1] };
-    }, { from, to, samples: +opt('samples', '1')!, shutter: +opt('shutter', '0.5')! });
-    console.log(`frames ${r.n}  avg ${r.avg.toFixed(1)}ms  p50 ${r.p50.toFixed(1)}  p95 ${r.p95.toFixed(1)}  max ${r.max.toFixed(1)}`);
+      return { n: ms.length, avg: ms.reduce((a, b) => a + b, 0) / ms.length, p50: ms[ms.length >> 1], p95: ms[Math.floor(ms.length * 0.95)], max: ms[ms.length - 1], used };
+    }, { from, to, samples: SAMPLES, shutter: +opt('shutter', '0.5')! });
+    console.log(`frames ${r.n}  avg ${r.avg.toFixed(1)}ms  p50 ${r.p50.toFixed(1)}  p95 ${r.p95.toFixed(1)}  max ${r.max.toFixed(1)}  sub-frames ${hist(r.used)}`);
   } else if (mode === 'video') {
     const dur: number = await page.evaluate(() => (window as any).__pdoom.duration);
     await video(page, +opt('from', '0')!, +opt('to', String(dur))!, +opt('fps', '60')!, path.resolve(opt('out', path.join(ROOT, 'out/pdoom.mp4'))!));

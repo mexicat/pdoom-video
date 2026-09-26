@@ -72,6 +72,13 @@ export function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+/**
+ * Index of the 60 fps output frame nearest t, for per-frame jitter/flicker. Constant over a frame's
+ * whole motion-blur shutter, so each frame shows one state (Math.floor(t * 60) switches at the frame's
+ * own time, blending two states in every frame).
+ */
+export const frameIdx = (t: number) => Math.round(t * 60);
+
 /** Stateless hash of integers/floats to [0,1). */
 export function hash(...xs: number[]) {
   let h = 2166136261 >>> 0;

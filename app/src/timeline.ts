@@ -59,7 +59,9 @@ export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
     E('prompt1', 'prompt', b.pre1, b.hook1, { params: { variant: 'chatgpt' } }),
     E('hook1', 'hook', b.hook1, b.room, { params: { n: 1 } }),
     E('room', 'room', b.room, b.shog),
-    E('shoggoth', 'shoggoth', b.shog, b.space),
+    // (its half-res G-buffer sparkles along the silhouettes from one sub-frame to the next: noise the adaptive
+    // sampler would chase to 324 sub-frames, though 108 already can't be told from 324)
+    E('shoggoth', 'shoggoth', b.shog, b.space, { maxSamples: 108 }),
     E('spacetime', 'spacetime', b.space, b.pre2),
     E('prompt2', 'prompt', b.pre2, b.hook2, { params: { variant: 'sydney' } }),
     E('hook2', 'hook', b.hook2, b.ascent, { params: { n: 2 } }),

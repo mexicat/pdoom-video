@@ -2,7 +2,7 @@
 // camera path, the lid, the lights, and the screen's contents (withheld). Rendered by ilya.ts, and by
 // loom.ts as the bottom level of its Droste recursion (so the dive lands exactly on our first frame).
 import * as THREE from 'three';
-import { FSPass, W, H, SCALE, scaleContext2D } from '../engine/gl';
+import { FSPass, W, H, SCALE, SS_TAP, scaleContext2D } from '../engine/gl';
 import type { Lyrics, Line, Word } from '../engine/lyrics';
 import type { AudioData } from '../engine/audio';
 import { LIN, rgba } from '../engine/palette';
@@ -119,7 +119,7 @@ export class IlyaRoom {
     this.stickerTex.minFilter = THREE.LinearMipmapLinearFilter;
     this.stickerTex.anisotropy = 8;
     this.pass = new FSPass(FRAG_ILYA, {
-      res: { value: new THREE.Vector2(W, H) }, time: { value: 0 },
+      res: { value: new THREE.Vector2(W, H) }, time: { value: 0 }, ssTap: SS_TAP,
       camPos: { value: new THREE.Vector3() }, camR: { value: new THREE.Vector3() }, camU: { value: new THREE.Vector3() }, camF: { value: new THREE.Vector3() },
       focal: { value: 1000 },
       lidA: { value: LID_OPEN }, screenI: { value: 1 }, ledI: { value: 0 }, props: { value: 1 }, chairOn: { value: 1 },

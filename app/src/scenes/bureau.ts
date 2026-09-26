@@ -14,7 +14,7 @@ import { FSPass, Layer2D, W, H, makeRT } from '../engine/gl';
 import { type Line, type Word, norm } from '../engine/lyrics';
 import { F, font, measure, layout, glyphX } from '../engine/type';
 import { strokeText, drawStrokeText, type StrokeText } from '../engine/stroke';
-import { clamp, ease, lerp, prog, hash, noise1, pulse, TAU } from '../engine/util';
+import { clamp, ease, lerp, prog, hash, noise1, pulse, TAU, frameIdx } from '../engine/util';
 import { PDoom, formatPDoom } from '../engine/hud';
 
 type Ctx2 = CanvasRenderingContext2D;
@@ -363,7 +363,7 @@ export default class Bureau extends Scene {
     }
     for (const ch of this.findings) if (t >= ch.t && t < ch.t + 0.1) amp += 1.8 * pulse(t, ch.t, 0.025);
     for (const ch of this.conclusion) if (t >= ch.t && t < ch.t + 0.1) amp += 1.8 * pulse(t, ch.t, 0.025);
-    const ph = Math.floor(t * 60);
+    const ph = frameIdx(t);
     return [amp * (hash(ph, 11) - 0.5) * 2, amp * (hash(ph, 12) - 0.5) * 2];
   }
 

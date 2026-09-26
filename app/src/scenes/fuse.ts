@@ -17,7 +17,7 @@ import { type Line, type Word, norm } from '../engine/lyrics';
 import { HEX, LIN, rgba } from '../engine/palette';
 import { F, font, layout, type TextLayout } from '../engine/type';
 import { GLSL_COMMON } from '../engine/glsl/common';
-import { clamp, ease, lerp, prog, hash, noise1, pulse, TAU, smoothstep, polylineLengths, pointAtLength, mulberry32, type V2 } from '../engine/util';
+import { clamp, ease, lerp, prog, hash, noise1, pulse, TAU, smoothstep, polylineLengths, pointAtLength, mulberry32, type V2, frameIdx } from '../engine/util';
 import { sparkHead, sparkParticles } from './_motifs';
 import { PDoom, formatPDoom } from '../engine/hud';
 import { bluesPitch } from './fuse-pitch';
@@ -578,7 +578,7 @@ export default class Fuse extends Scene {
     if (fuseVisible) {
       const cam = this.camFuse(t);
       const shake = 3 * pulse(t, this.tMacro, 0.08);
-      fm = camXf(cam, shake * (hash(Math.floor(t * 60), 1) - 0.5), -dropPx + shake * (hash(Math.floor(t * 60), 2) - 0.5));
+      fm = camXf(cam, shake * (hash(frameIdx(t), 1) - 0.5), -dropPx + shake * (hash(frameIdx(t), 2) - 0.5));
       const im = invXf(fm);
       const hw = this.at(bs);
       const hs = apply(fm, hw.x, hw.y);
@@ -642,7 +642,8 @@ export default class Fuse extends Scene {
       return null;
     };
     const sb = drop > 0.5 ? this.over : this.add;
-    sparkParticles(sb, t, headAt, { rate: 160 + 140 * inh, life: 0.5, speed: 200 * sparkScale, gravity: 480 * sparkScale, intensity: 1.2, seed: 10, width: 1.5 * Math.min(1.6, sparkScale) });
+    const inhAt = (tb: number) => prog(tb, this.tEnd - this.beatLen * 0.5, this.tEnd, ease.inCubic);
+    sparkParticles(sb, t, headAt, { rate: (tb) => 160 + 140 * inhAt(tb), rateMax: 300, life: 0.5, speed: 200 * sparkScale, gravity: 480 * sparkScale, intensity: 1.2, seed: 10, width: 1.5 * Math.min(1.6, sparkScale) });
     // sputter bursts on the beats (the fuse spits in time)
     const au = this.ctx.audio;
     const bi = Math.floor(au.beatAt(t));

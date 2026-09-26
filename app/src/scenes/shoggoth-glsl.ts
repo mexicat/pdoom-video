@@ -182,7 +182,7 @@ void main() {
   float dif = max(dot(n, keyDir), 0.0);
   float sh = quality > 0.5 && dif > 0.01 ? softShadow(p + n * 0.01, keyDir) : 1.0;
   float key = dif * sh;
-  float fres = pow(1.0 - max(dot(n, -rd), 0.0), 2.5);
+  float fres = pow(sat(1.0 - dot(n, -rd)), 2.5); // (sat: a dot a hair above 1 would give pow(negative) = NaN)
   float rim = fres * (0.35 + 0.65 * max(dot(n, rimDir), 0.0));
   g0 = vec4(t, m.y, m.z, m.w);
   g1 = vec4(key, rim, ao, max(dot(n, vec3(0.0, 1.0, 0.0)), 0.0));

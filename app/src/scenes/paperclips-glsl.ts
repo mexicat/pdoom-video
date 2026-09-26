@@ -1,5 +1,6 @@
 // Shaders for FIG. 9 (paperclips): engraved-steel wire shading, the top-down split layer,
 // and the raymarched infinite lattice (floor stack + descending ceiling stack).
+import { SS_TAP_GLSL } from '../engine/gl';
 import { GLSL_CLIP } from './paperclips-geo';
 
 export const MAX_ITEMS = 64;
@@ -7,6 +8,7 @@ export const CELL = 40;
 const CELLF = CELL.toFixed(1);
 
 const GLSL_SHADE = /* glsl */ `
+${SS_TAP_GLSL}
 ${GLSL_CLIP}
 uniform vec3 camPos, camR, camU, camF; uniform float focal; uniform vec2 res; uniform float time;
 uniform vec3 keyDir; uniform float keyI; uniform vec3 rimDir; uniform float rimI;
@@ -41,7 +43,7 @@ vec3 shadeWireL(vec3 P, vec3 N, vec3 V, float theta, float wirePx, float shadow,
   float spec = pow(max(dot(N, Hh), 0.0), 60.0) * keyI * shadow;
   vec3 col = C_BONE * 0.74 * cov + C_BONE * 0.85 * smoothstep(0.3, 0.6, spec);
   float nv = max(dot(N, V), 0.0);
-  float rim = pow(1.0 - nv, 5.0) * smoothstep(0.0, 0.7, dot(N, rimDir)) * rimI * smoothstep(3.0, 12.0, wirePx);
+  float rim = pow(sat(1.0 - nv), 5.0) * smoothstep(0.0, 0.7, dot(N, rimDir)) * rimI * smoothstep(3.0, 12.0, wirePx);
   col += C_SIGNAL * rim * 1.1;
   // the spark lamp: a little hot light on nearby wires
   vec3 Lv = lampPos - P; float Ld = length(Lv); Lv /= Ld;
@@ -132,11 +134,8 @@ vec3 topSample(vec2 px) {
 void main() {
   vec2 px0 = vUv * res - 0.5 * res;
   vec3 col = vec3(0.0);
-  for (int k = 0; k < 4; k++) {
-    vec2 o = vec2(k == 0 ? 0.125 : k == 1 ? 0.375 : k == 2 ? -0.125 : -0.375, k == 0 ? -0.375 : k == 1 ? 0.125 : k == 2 ? 0.375 : -0.125) / PX_SCALE; // offsets within a physical px
-    col += topSample(px0 + o);
-  }
-  fragColor = vec4(col * 0.25, 1.0);
+  for (int k = ssK0(); k < ssK1(); k++) col += topSample(px0 + rgss(k) / PX_SCALE); // offsets within a physical px
+  fragColor = vec4(col * ssWeight(), 1.0);
 }`;
 
 // Phases B–D: raymarched infinite lattice (floor stack + optional ceiling stack), fog, lamp.
@@ -282,13 +281,12 @@ void main() {
   vec2 px0 = vUv * res - 0.5 * res;
   // 4-tap rotated-grid supersampling: crisp silhouettes and engraving without shimmer
   vec3 col = vec3(0.0);
-  for (int k = 0; k < 4; k++) {
-    vec2 o = vec2(k == 0 ? 0.125 : k == 1 ? 0.375 : k == 2 ? -0.125 : -0.375, k == 0 ? -0.375 : k == 1 ? 0.125 : k == 2 ? 0.375 : -0.125) / PX_SCALE; // offsets within a physical px
-    vec2 px = px0 + o;
+  for (int k = ssK0(); k < ssK1(); k++) {
+    vec2 px = px0 + rgss(k) / PX_SCALE; // offsets within a physical px
     vec3 rd = normalize(camF * focal + camR * px.x + camU * px.y);
     col += trace(rd);
   }
-  col *= 0.25;
+  col *= ssWeight();
   vec2 px = px0;
   float sm = smoothstep(slitH + 30.0, slitH, abs(px.y - horizonY));
   col *= mix(1.0, sm, slitK);

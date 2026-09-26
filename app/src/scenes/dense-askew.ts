@@ -20,7 +20,7 @@ import { F, font, layout, type TextLayout } from '../engine/type';
 import { Lyrics, type Line, type Word } from '../engine/lyrics';
 import type { AudioData } from '../engine/audio';
 import type { PostOverrides } from '../engine/scene';
-import { clamp, ease, hash, lerp, prog, pulse, springStep } from '../engine/util';
+import { clamp, ease, hash, lerp, prog, pulse, springStep, frameIdx } from '../engine/util';
 import { drawMask2D } from './_motifs';
 import { beatsIn } from './stack-kit';
 
@@ -272,7 +272,7 @@ export class Askew {
     const lean = this.lean(t);
     const m = this.maskState(t);
     const reach = Math.max(0, stepped(t, this.reachK, 2.0, 0.4));
-    const fr = Math.floor(t * 60);
+    const fr = frameIdx(t);
     const shake: [number, number] = [(hash(fr, 1) - 0.5) * 22 * hit, (hash(fr, 2) - 0.5) * 16 * hit];
 
     // ---- the thing (and ink + grid)

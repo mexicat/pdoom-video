@@ -1,4 +1,5 @@
 // Shaders for FIG. 13 (loom): the log-polar Droste recursion of self-upgrades.
+import { SS_TAP_GLSL } from '../engine/gl';
 
 /**
  * Droste recursion over a source plate: rectangular nesting with scale s, optional log-polar
@@ -8,6 +9,7 @@
  * texture has mipmaps; gradients are taken from the continuous mapping to avoid seams.
  */
 export const FRAG_DROSTE = /* glsl */ `
+${SS_TAP_GLSL}
 uniform vec2 res; uniform float time;
 uniform sampler2D src; uniform float s; uniform float zoom; uniform float twist; uniform float spin;
 uniform sampler2D term; uniform float termLevel;
@@ -75,9 +77,6 @@ vec3 drosteAt(vec2 uv) {
 }
 void main() {
   vec3 col = vec3(0.0);
-  for (int k = 0; k < 4; k++) {
-    vec2 o = vec2(k == 0 ? 0.125 : k == 1 ? 0.375 : k == 2 ? -0.125 : -0.375, k == 0 ? -0.375 : k == 1 ? 0.125 : k == 2 ? 0.375 : -0.125);
-    col += drosteAt(vUv + o / res);
-  }
-  fragColor = vec4(col * 0.25, 1.0);
+  for (int k = ssK0(); k < ssK1(); k++) col += drosteAt(vUv + rgss(k) / res);
+  fragColor = vec4(col * ssWeight(), 1.0);
 }`;

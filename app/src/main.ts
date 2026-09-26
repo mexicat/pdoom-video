@@ -1,5 +1,5 @@
 // Entry: preview player (default) or export mode (?export=1, driven by scripts/render.ts).
-import { Engine } from './engine/engine';
+import { Engine, type AdaptiveSampling } from './engine/engine';
 import { PW, PH, SCALE } from './engine/gl';
 import { makeTimeline } from './timeline';
 
@@ -42,7 +42,7 @@ function setupExport() {
     height: PH,
     timeline: TIMELINE.map(({ id, start, end }) => ({ id, start, end })),
     /** Render a single frame at t (seeks as needed). */
-    still(t: number, samples = 1, shutter = 0.5) { engine.render(t, 1 / 60, true, samples, shutter); return true; },
+    still(t: number, samples: number | AdaptiveSampling = 1, shutter = 0.5) { return engine.render(t, 1 / 60, true, samples, shutter); },
     /** The last rendered frame as a full-resolution (PW x PH) PNG, base64 (for stills at scale > 1). */
     async png() {
       const px = await engine.readPixelsAsync(), row = PW * 4;
@@ -57,11 +57,12 @@ function setupExport() {
     },
     /**
      * Render [from, to) at fps and stream raw RGBA frames (bottom-up) over a WebSocket.
-     * Returns when all frames were sent. With `inflight`, the receiver acknowledges each frame it has
-     * handed on (a text message with its running count) and at most `inflight` frames are unacknowledged:
+     * Returns when all frames were sent, with a histogram of sub-frames per frame. With `inflight`, the
+     * receiver acknowledges each frame it has handed on (a text message with its running count) and at
+     * most `inflight` frames are unacknowledged:
      * backpressure from the encoder, so a slow encode (4K) cannot pile frames up in the receiver's memory.
      */
-    async stream(opts: { from: number; to: number; fps: number; ws: string; samples?: number; shutter?: number; inflight?: number }) {
+    async stream(opts: { from: number; to: number; fps: number; ws: string; samples?: number | AdaptiveSampling; shutter?: number; inflight?: number }) {
       const ws = new WebSocket(opts.ws);
       ws.binaryType = 'arraybuffer';
       let acked = 0;
@@ -72,9 +73,12 @@ function setupExport() {
       const buf = new Uint8Array(PW * PH * 4);
       // warm-up: render one frame before the range so the first frame is sequential for stateful scenes
       const S = opts.samples ?? 1, SH = opts.shutter ?? 0.5;
-      if (n0 > 0) engine.render((n0 - 1) * dt, dt, false, S, SH);
+      // (adaptive sampling only runs stateless scenes: one sample is enough for the warm-up)
+      if (n0 > 0) engine.render((n0 - 1) * dt, dt, false, typeof S === 'number' ? S : 1, SH);
+      const used: Record<number, number> = {}; // sub-frames per frame -> frames
       for (let n = n0; n < n1; n++) {
-        engine.render(n * dt, dt, false, S, SH);
+        const k = engine.render(n * dt, dt, false, S, SH);
+        used[k] = (used[k] ?? 0) + 1;
         await engine.readPixelsAsync(buf);
         if (opts.inflight) while (n - n0 - acked >= opts.inflight) await new Promise((r) => setTimeout(r, 2));
         while (ws.bufferedAmount > 64 * 1024 * 1024) await new Promise((r) => setTimeout(r, 2));
@@ -83,7 +87,7 @@ function setupExport() {
       }
       while (ws.bufferedAmount > 0) await new Promise((r) => setTimeout(r, 5));
       ws.close();
-      return n1 - n0;
+      return used;
     },
   };
   window.__pdoom.ready = true;

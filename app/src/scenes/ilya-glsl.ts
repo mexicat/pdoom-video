@@ -4,6 +4,7 @@
 //  - the theatre: proscenium arch, traveller curtains, a valance, raked rows of empty seats and one
 //    spotlight on nothing (the props have been struck; their spike marks remain).
 // World units are metres, y up; the laptop faces +z (the auditorium).
+import { SS_TAP_GLSL } from '../engine/gl';
 
 export const ILYA = {
   deskY: 0.75,
@@ -18,6 +19,7 @@ export const ILYA = {
 const f = (x: number) => x.toFixed(5);
 
 export const FRAG_ILYA = /* glsl */ `
+${SS_TAP_GLSL}
 uniform vec2 res;
 uniform vec3 camPos, camR, camU, camF; uniform float focal;
 uniform float time;
@@ -462,13 +464,12 @@ void main() {
   vec2 px0 = vUv * res - 0.5 * res;
   vec3 col = vec3(0.0);
   float tc = -1.0;
-  for (int k = 0; k < 4; k++) {
-    vec2 o = vec2(k == 0 ? 0.125 : k == 1 ? 0.375 : k == 2 ? -0.125 : -0.375, k == 0 ? -0.375 : k == 1 ? 0.125 : k == 2 ? 0.375 : -0.125);
+  for (int k = ssK0(); k < ssK1(); k++) {
     float th;
-    col += pixel(px0 + o / PX_SCALE, 0.0, th); // (supersamples within one physical px)
-    if (k == 0) tc = th;
+    col += pixel(px0 + rgss(k) / PX_SCALE, 0.0, th); // (supersamples within one physical px)
+    if (k == ssK0()) tc = th;
   }
-  col *= 0.25;
+  col *= ssWeight();
   vec3 rd = normalize(camF * focal + camR * px0.x + camU * px0.y);
   float jit = hash12(gl_FragCoord.xy + fract(time * 7.31) * 97.0);
   col += volume(camPos, rd, tc, jit);

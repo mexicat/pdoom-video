@@ -10,14 +10,22 @@ type P2 = { x: number; y: number };
 /**
  * Sputtering particles for a spark whose head position over time is `headAt(t)`.
  * Deterministic: particles are born at fixed times (rate per second) with hashed velocities.
+ * A rate that changes over time is a function of the birth time with its maximum `rateMax`: particles
+ * are then born on the constant rateMax clock and thinned by hash, so each one keeps its identity
+ * whatever t it is drawn at (a rate read at the current t would re-time them all from one
+ * motion-blur sub-frame to the next).
  * Draws into a 2D LineBatch as short streaks (motion-blurred), additive.
  */
-export function sparkParticles(lb: LineBatch, t: number, headAt: (t: number) => P2 | null, o: { rate?: number; life?: number; speed?: number; gravity?: number; intensity?: number; seed?: number; width?: number } = {}) {
-  const rate = o.rate ?? 90, life = o.life ?? 0.45, speed = o.speed ?? 260, g = o.gravity ?? 520, I = o.intensity ?? 1, seed = o.seed ?? 1;
+export function sparkParticles(lb: LineBatch, t: number, headAt: (t: number) => P2 | null, o: { rate?: number | ((tb: number) => number); rateMax?: number; life?: number; speed?: number; gravity?: number; intensity?: number; seed?: number; width?: number } = {}) {
+  const life = o.life ?? 0.45, speed = o.speed ?? 260, g = o.gravity ?? 520, I = o.intensity ?? 1, seed = o.seed ?? 1;
+  const rateAt = typeof o.rate === 'function' ? o.rate : null;
+  const rate = rateAt ? o.rateMax! : (o.rate as number | undefined) ?? 90;
+  if (!(rate > 0)) return;
   const n0 = Math.floor((t - life) * rate), n1 = Math.floor(t * rate);
   for (let n = n0; n <= n1; n++) {
     const tb = n / rate;
     if (tb > t) continue;
+    if (rateAt && hash(n, seed + 3) * rate >= rateAt(tb)) continue;
     const age = t - tb;
     const h = headAt(tb);
     if (!h) continue;

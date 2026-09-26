@@ -674,7 +674,7 @@ export default class OpenScene extends Scene {
     if (ignite > 0) {
       const burst = pulse(t, B(0), 0.16);
       const sp = this.w.sparks!;
-      const sputter = 1 + 3 * prog(t, sp.start, sp.start + 0.08) * (1 - prog(t, sp.end - 0.1, sp.end + 0.1));
+      const sputterAt = (tt: number) => 1 + 3 * prog(tt, sp.start, sp.start + 0.08) * (1 - prog(tt, sp.end - 0.1, sp.end + 0.1));
       let prev = ps;
       let trail = 0;
       for (let i = 1; i <= 12; i++) {
@@ -693,7 +693,7 @@ export default class OpenScene extends Scene {
         const q = this.penAt(tb);
         const s = this.w2s(c, q.x, q.y);
         return { x: s[0], y: s[1] };
-      }, { rate: 60 * sputter + 700 * pulse(t, B(0), 0.06), intensity: 0.9, speed: 220 + 420 * burst, seed: 17, life: 0.42 });
+      }, { rate: (tb) => 60 * sputterAt(tb) + 700 * pulse(tb, B(0), 0.06), rateMax: 940, intensity: 0.9, speed: 220 + 420 * burst, seed: 17, life: 0.42 });
       this.hornSparks(t, c, X);
       this.wordSparks(t, c, X);
       this.rayHeads(t, c, X);

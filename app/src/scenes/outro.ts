@@ -731,8 +731,9 @@ export default class Outro extends Scene {
         }
         const head = (tt: number) => ({ x: cx + Math.sin(tt * 1.3) * 6, y: cy + Math.cos(tt * 1.7) * 4 });
         const alive = (tt: number) => this.rb(tt) >= FADE0 + 0.35;
-        const glow = smoothstep(0.35, 0.65, k) * (1 - smoothstep(CLICK, CLICK + 0.12, k));
-        sparkParticles(lb, t, (tt) => (alive(tt) ? head(tt) : null), { rate: 50 * glow, intensity: glow, speed: 150 });
+        const glowAt = (kk: number) => smoothstep(0.35, 0.65, kk) * (1 - smoothstep(CLICK, CLICK + 0.12, kk));
+        const glow = glowAt(k);
+        sparkParticles(lb, t, (tt) => (alive(tt) ? head(tt) : null), { rate: (tb) => 50 * glowAt(this.rb(tb) - FADE0), rateMax: 50, intensity: glow, speed: 150 });
         if (glow > 0.01) sparkHead(lb, head(t).x, head(t).y, t, 1.2, glow);
         lb.render(renderer, out);
         // the button and the cursor

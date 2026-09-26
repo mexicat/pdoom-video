@@ -11,7 +11,7 @@ import { LineBatch } from '../engine/lines';
 import { LIN, rgba } from '../engine/palette';
 import { F, font, glyphX, layout, textPath2D } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, keys, lerp, mulberry32, prog, pulse, TAU } from '../engine/util';
+import { clamp, ease, hash, keys, lerp, mulberry32, prog, pulse, TAU, frameIdx } from '../engine/util';
 import { makeEyePass, EYE } from './ascent-eye';
 import { makeNotePass, makeCompPass, makeCandles, DEC, MOON, NOTE, type Candle } from './ascent-note';
 import { sparkHead, sparkParticles } from './_motifs';
@@ -721,7 +721,7 @@ export default class Ascent extends Scene {
       const q = E - j;
       let p = 0, b = 0;
       if (t < tL || j === 30 || q <= 2.2) {
-        if (q > 14) { p = hash(j, Math.floor(t * 60)) * 10; b = 12; }
+        if (q > 14) { p = hash(j, frameIdx(t)) * 10; b = 12; }
         else if (q > -3) {
           const v = Math.pow(10, q);
           p = v % 10;
@@ -731,7 +731,7 @@ export default class Ascent extends Scene {
       } else {
         // spin-down: a wave of zeros settling left to right
         const ts = tL + 0.05 + 0.013 * (27 - j);
-        if (t < ts) { p = hash(j, Math.floor(t * 60)) * 10; b = 12; }
+        if (t < ts) { p = hash(j, frameIdx(t)) * 10; b = 12; }
         else {
           const e = t - ts;
           b = 12 * Math.exp(-e / 0.025);

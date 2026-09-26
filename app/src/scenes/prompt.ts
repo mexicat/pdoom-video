@@ -11,7 +11,7 @@ import { LineBatch } from '../engine/lines';
 import { rgba } from '../engine/palette';
 import { F, font, measure, plain } from '../engine/type';
 import { Lyrics, norm, type Line, type Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, smoothstep, TAU } from '../engine/util';
+import { clamp, ease, hash, lerp, noise1, prog, smoothstep, TAU, frameIdx } from '../engine/util';
 import { sparkHead, sparkParticles, MASK } from './_motifs';
 import { SPECS, REPLY, META, type Variant, type Cand } from './prompt-data';
 import { PDoom, formatPDoom } from '../engine/hud';
@@ -553,7 +553,7 @@ export default class Prompt extends Scene {
         const p = unstable ? clamp(p0 * (1 + 0.5 * noise1(t * 2.7 + i * 7.3, k.id)), 0.001, 0.99) : p0;
         const y = -hgt + headH + (i + 1) * rh - 5;
         const isPick = i === k.pick;
-        const fl = hash(i, Math.floor(t * 60), k.id) < 0.25 + 0.75 * built;
+        const fl = hash(i, frameIdx(t), k.id) < 0.25 + 0.75 * built;
         if (!picked && !fl) return;
         const jitter = picked ? 1 : 0.3 + 0.7 * built + (hash(i, Math.floor(t * 30), 3) - 0.5) * 0.5 * (1 - built);
         const on = picked && isPick;

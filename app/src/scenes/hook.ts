@@ -16,7 +16,7 @@ import { HEX, rgba } from '../engine/palette';
 import { F, font, measure, layout, plain, type TextLayout } from '../engine/type';
 import { PDoom, formatPDoom } from '../engine/hud';
 import type { Word } from '../engine/lyrics';
-import { clamp, ease, hash, lerp, noise1, prog, pulse, smoothstep } from '../engine/util';
+import { clamp, ease, hash, lerp, noise1, prog, pulse, smoothstep, frameIdx } from '../engine/util';
 import { sparkHead2D } from './_motifs';
 
 const CAP = 0.686; // Archivo cap height / em
@@ -669,7 +669,7 @@ export default class Hook extends Scene {
       const tb = i === -2 ? this.tX0 : i === -1 ? this.tDoom : this.tX0 + 0.025 + (span * (RANK[i] ?? 3)) / 3;
       const heat = prog(t, tb - 0.03, tb + 0.01);
       const out = i === -1 ? 0.6 * prog(t, tb + 0.01, this.ctx.end) : prog(t, tb, tb + 0.05, ease.inQuad);
-      const flick = 0.55 + 0.45 * hash(Math.floor(t * 60), i + 3);
+      const flick = 0.55 + 0.45 * hash(frameIdx(t), i + 3);
       const a = (1 - out) * (heat > 0 && out > 0 ? flick : 1) * (1 + 0.6 * heat * (1 - out));
       const k = Math.min(1, heat * 1.3);
       const col = k > 0 ? `rgb(${Math.round(lerp(242, 255, k))},${Math.round(lerp(236, 92, k))},${Math.round(lerp(228, 36, k))})` : rgba('bone');

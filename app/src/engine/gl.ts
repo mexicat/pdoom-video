@@ -12,6 +12,22 @@ export const H = 1080;
 export const PW = W * SCALE;
 export const PH = H * SCALE;
 
+/**
+ * Supersampling shared across motion-blur sub-frames. Shaders that supersample internally with the
+ * 4 rotated-grid taps (`rgss(k)`) take only tap `ssTap` when it is >= 0: the engine cycles the taps
+ * over a frame's sub-frames (always a multiple of 4 of them), which averages to the same image for a
+ * quarter of the shading cost. -1 (preview, single-sample stills): take all four.
+ * Usage: `uniforms: { ssTap: SS_TAP }` and `${SS_TAP_GLSL}` in the shader, then
+ * `for (int k = ssK0(); k < ssK1(); k++) col += shade(px + rgss(k)); col *= ssWeight();`
+ */
+export const SS_TAP: THREE.IUniform<number> = { value: -1 };
+/** GLSL: the ssTap uniform, and loop bounds and weight for the taps this sub-frame takes. */
+export const SS_TAP_GLSL = /* glsl */ `
+uniform int ssTap;
+int ssK0() { return ssTap < 0 ? 0 : ssTap; }
+int ssK1() { return ssTap < 0 ? 4 : ssTap + 1; }
+float ssWeight() { return ssTap < 0 ? 0.25 : 1.0; }`;
+
 const RT_SCALE = new WeakMap<THREE.WebGLRenderTarget, number>();
 /** Physical px per logical px of a render target made by makeRT (1 for other targets; SCALE for the canvas). */
 export function rtScale(rt: THREE.WebGLRenderTarget | null) { return rt ? RT_SCALE.get(rt) ?? 1 : SCALE; }
