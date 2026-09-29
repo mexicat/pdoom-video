@@ -12,6 +12,12 @@ const scene = (name: string) => () => {
   return m ? m() : Promise.reject(new Error(`scene module not found: scenes/${name}.ts`));
 };
 
+/**
+ * `?edition=dna` swaps in the DNA edition's scenes where they exist (docs/DNA_VIDEO_PLAN.md);
+ * every other slot, and the default, is the reference film.
+ */
+const EDITION = typeof location !== 'undefined' ? new URLSearchParams(location.search).get('edition') : null;
+
 export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
   /** Cut on the last beat at/before the first word of the matching line (never after the word). */
   const cut = (q: string, nth = 0, tol = 0.02) => {
@@ -52,31 +58,37 @@ export function makeTimeline(ly: Lyrics, au: AudioData): TimelineEntry[] {
 
   const E = (id: string, file: string, start: number, end: number, extra: Partial<TimelineEntry> = {}): TimelineEntry =>
     ({ id, load: scene(file), start, end, ...extra });
+  /** In the DNA edition, the slot's DNA module (scenes/dna-*.ts) once it exists; else the reference scene. */
+  const pick = (dna: string, ref: string) => (EDITION === 'dna' && modules[`./scenes/${dna}.ts`] ? dna : ref);
+  const isDna = (f: string) => f.startsWith('dna-');
+  const fold = pick('dna-fold', 'spacetime');
 
   return [
-    E('open', 'open', 0, b.loss),
-    E('loss', 'loss', b.loss, b.pre1),
-    E('prompt1', 'prompt', b.pre1, b.hook1, { params: { variant: 'chatgpt' } }),
-    E('hook1', 'hook', b.hook1, b.room, { params: { n: 1 } }),
-    E('room', 'room', b.room, b.shog),
+    E('open', pick('dna-open', 'open'), 0, b.loss),
+    E('loss', pick('dna-loss', 'loss'), b.loss, b.pre1),
+    E('prompt1', pick('dna-prompt', 'prompt'), b.pre1, b.hook1, { params: { variant: 'chatgpt' } }),
+    E('hook1', pick('dna-hook', 'hook'), b.hook1, b.room, { params: { n: 1 } }),
+    E('room', pick('dna-room', 'room'), b.room, b.shog),
     // (its half-res G-buffer sparkles along the silhouettes from one sub-frame to the next: noise the adaptive
     // sampler would chase to 324 sub-frames, though 108 already can't be told from 324)
-    E('shoggoth', 'shoggoth', b.shog, b.space, { maxSamples: 108 }),
-    E('spacetime', 'spacetime', b.space, b.pre2),
-    E('prompt2', 'prompt', b.pre2, b.hook2, { params: { variant: 'sydney' } }),
-    E('hook2', 'hook', b.hook2, b.ascent, { params: { n: 2 } }),
-    E('ascent', 'ascent', b.ascent, b.bureau),
-    E('bureau', 'bureau', b.bureau, b.left),
-    E('leftturn', 'leftturn', b.left, b.pre3),
-    E('prompt3', 'prompt', b.pre3, b.hook3, { params: { variant: 'gato' } }),
-    E('hook3', 'hook', b.hook3, b.clips, { params: { n: 3 } }),
-    E('paperclips', 'paperclips', b.clips, b.fuse),
-    E('fuse', 'fuse', b.fuse, b.stack),
-    E('stack', 'stack', b.stack, b.dense),
-    E('dense', 'dense', b.dense, b.hook4),
-    E('hook4', 'hook', b.hook4, b.loom, { params: { n: 4 } }),
-    E('loom', 'loom', b.loom, b.ilya),
-    E('ilya', 'ilya', b.ilya, b.outro),
-    E('outro', 'outro', b.outro, b.end),
+    E('shoggoth', pick('dna-shoggoth', 'shoggoth'), b.shog, b.space, isDna(pick('dna-shoggoth', 'shoggoth')) ? {} : { maxSamples: 108 }),
+    // the DNA hero fold keeps its slot but overlaps into prompt2 until "Sydney" starts, so the held
+    // "rearranging" hands over across the cut instead of being cut off (dna-prompt composites it)
+    E('spacetime', fold, b.space, isDna(fold) ? ly.get('Sydney').words[0]!.start : b.pre2),
+    E('prompt2', pick('dna-prompt', 'prompt'), b.pre2, b.hook2, { params: { variant: 'sydney' } }),
+    E('hook2', pick('dna-hook', 'hook'), b.hook2, b.ascent, { params: { n: 2 } }),
+    E('ascent', pick('dna-ascent', 'ascent'), b.ascent, b.bureau),
+    E('bureau', pick('dna-bureau', 'bureau'), b.bureau, b.left),
+    E('leftturn', pick('dna-leftturn', 'leftturn'), b.left, b.pre3),
+    E('prompt3', pick('dna-prompt', 'prompt'), b.pre3, b.hook3, { params: { variant: 'gato' } }),
+    E('hook3', pick('dna-hook', 'hook'), b.hook3, b.clips, { params: { n: 3 } }),
+    E('paperclips', pick('dna-paperclips', 'paperclips'), b.clips, b.fuse),
+    E('fuse', pick('dna-fuse', 'fuse'), b.fuse, b.stack),
+    E('stack', pick('dna-stack', 'stack'), b.stack, b.dense),
+    E('dense', pick('dna-dense', 'dense'), b.dense, b.hook4),
+    E('hook4', pick('dna-hook', 'hook'), b.hook4, b.loom, { params: { n: 4 } }),
+    E('loom', pick('dna-loom', 'loom'), b.loom, b.ilya),
+    E('ilya', pick('dna-ilya', 'ilya'), b.ilya, b.outro),
+    E('outro', pick('dna-outro', 'outro'), b.outro, b.end),
   ];
 }
