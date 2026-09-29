@@ -37,24 +37,34 @@ async function ensureServer(): Promise<{ url: string; stop: () => void }> {
   if (await reachable(url)) return { url, stop: () => {} };
   const port = 5300 + Math.floor(Math.random() * 500);
   // no live reload: a file saved mid-render must not reload the page
-  const proc = Bun.spawn(['bunx', 'vite', '--port', String(port), '--strictPort'], { cwd: APP, stdout: 'ignore', stderr: 'ignore', env: { ...process.env, PDOOM_NO_HMR: '1' } });
+  // Use this Bun executable and the installed Vite CLI; a fresh Windows shell may not have bunx on PATH.
+  const proc = Bun.spawn([process.execPath, path.join(APP, 'node_modules/vite/bin/vite.js'), '--port', String(port), '--strictPort'], { cwd: APP, stdout: 'ignore', stderr: 'inherit', env: { ...process.env, PDOOM_NO_HMR: '1' } });
   const u = `http://localhost:${port}`;
-  for (let i = 0; i < 100 && !(await reachable(u)); i++) await Bun.sleep(100);
-  return { url: u, stop: () => proc.kill() };
+  for (let i = 0; i < 100; i++) {
+    if (await reachable(u)) return { url: u, stop: () => proc.kill() };
+    if (proc.exitCode !== null) throw new Error(`Vite exited before starting (code ${proc.exitCode})`);
+    await Bun.sleep(100);
+  }
+  proc.kill();
+  throw new Error(`Vite did not start at ${u}`);
 }
+
+// ANGLE backend for WebGL: Metal on macOS, Direct3D 11 on Windows, Chrome's default elsewhere (--angle overrides)
+const ANGLE = opt('angle', ({ darwin: 'metal', win32: 'd3d11' } as Record<string, string>)[process.platform]);
 
 async function openPage(url: string) {
   const browser = await chromium.launch({
     channel: 'chrome',
     headless: !flag('headed'),
-    args: ['--use-angle=metal', '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'],
+    args: [...(ANGLE ? [`--use-angle=${ANGLE}`] : []), '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'],
   });
   const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const logs: string[] = [];
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') logs.push(`[${m.type()}] ${m.text()}`); });
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const only = opt('only');
-  await page.goto(`${url}/?export=1${only ? `&only=${only}` : ''}${SCALE !== 1 ? `&scale=${SCALE}` : ''}`);
+  const edition = opt('edition'); // e.g. --edition dna (see src/timeline.ts)
+  await page.goto(`${url}/?export=1${only ? `&only=${only}` : ''}${SCALE !== 1 ? `&scale=${SCALE}` : ''}${edition ? `&edition=${edition}` : ''}`);
   await page.waitForFunction(() => (window as any).__pdoom?.ready || (window as any).__pdoom?.error, null, { timeout: 120000 });
   const err = await page.evaluate(() => (window as any).__pdoom.error);
   if (err) throw new Error(`app failed to boot:\n${err}\n${logs.join('\n')}`);
@@ -153,7 +163,8 @@ try {
     }));
   } else if (mode === 'stills') {
     const times = (opt('t') ?? '0').split(',').map(Number);
-    const files = await stills(page, times, opt('out', path.join(ROOT, 'out/stills'))!);
+    // absolute: Bun on Windows throws EEXIST from mkdirSync(recursive) on an existing relative '../' dir
+    const files = await stills(page, times, path.resolve(opt('out', path.join(ROOT, 'out/stills'))!));
     console.log(files.join('\n'));
   } else if (mode === 'sheet') {
     const from = +opt('from', '0')!, to = +opt('to', '10')!, n = +opt('n', '12')!;
@@ -164,7 +175,7 @@ try {
       const tl: { id: string; start: number }[] = await page.evaluate(() => (window as any).__pdoom.timeline);
       times = tl.slice(1).flatMap((e) => [e.start - 0.1, e.start - 1 / 60, e.start + 1 / 60, e.start + 0.1]);
     }
-    const out = opt('out', path.join(ROOT, `out/sheets/sheet_${from}-${to}.png`))!;
+    const out = path.resolve(opt('out', path.join(ROOT, `out/sheets/sheet_${from}-${to}.png`))!);
     await sheet(page, times, +opt('cols', '4')!, out);
     console.log(out);
   } else if (mode === 'plates') {
