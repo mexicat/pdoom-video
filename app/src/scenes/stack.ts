@@ -259,7 +259,9 @@ export default class Stack extends Scene {
     };
     const label = (text: string, cx: number, cy: number, capH: number, c: RGB, al = 1, alignLeft = false, w = 1.1) => {
       const sl = strokeLines(text, 'tech', 100);
-      const k = Math.min(capH / Math.max(1e-3, sl.cap), (alignLeft ? HX * 2 - 1.1 : BX1 - BX0 - .35) / Math.max(.001, sl.width));
+      const k = RUSSIAN
+        ? Math.min(capH / Math.max(1e-3, sl.cap), (alignLeft ? HX * 2 - 1.1 : BX1 - BX0 - .35) / Math.max(.001, sl.width))
+        : capH / Math.max(1e-3, sl.cap);
       const ox = alignLeft ? cx : cx - (sl.width * k) / 2;
       for (const st of sl.strokes) for (let i = 1; i < st.length; i++) {
         const p = st[i - 1]!, q = st[i]!;

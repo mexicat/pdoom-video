@@ -1,10 +1,9 @@
 # I'm Upping My P(doom) — music video
 
-**Russian branch:** the default preview and export use the original animations
-with Russian text and the «Повышен риск конца» recording.
+**Russian edition:** select `?lang=ru` in the preview or `--lang ru` when rendering
+to use the original animations with Russian text and the «Повышен риск конца» recording.
 See the [Russian video workflow](docs/RUSSIAN-VIDEO.md). The final render is
-`out/ru/pdoom-ru-v2.mp4`. Use `?lang=en` in the preview or `--lang en` when rendering
-to select the original English edition.
+`out/ru/pdoom-ru-v2.mp4`. The original English edition remains the default.
 
 A generative, code-rendered music video with word-synced karaoke typography. Every frame is a deterministic function of song time, so the live preview in the browser and the offline 1080p60 (or 4K60) export are identical.
 

@@ -27,7 +27,7 @@ const SAMPLES = opt('samples', '1') === 'auto'
   : +opt('samples', '1')!;
 const hist = (h: Record<string, number>) => Object.entries(h).sort((a, b) => +a[0] - +b[0]).map(([k, v]) => `${k}:${v}`).join(' ');
 const ROOT = path.resolve(APP, '..');
-const LANG = opt('lang', 'ru')!;
+const LANG = opt('lang', 'en')!;
 if (!['ru', 'en'].includes(LANG)) throw new Error('--lang must be ru or en');
 
 async function reachable(url: string) {

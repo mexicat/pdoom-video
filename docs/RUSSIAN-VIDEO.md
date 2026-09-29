@@ -1,6 +1,6 @@
 # Russian video edition
 
-This branch renders «Повышен риск конца» with the original scene animations and a user-supplied Russian recording. The Russian preview is the default; add `?lang=en` for the English edition.
+This branch renders «Повышен риск конца» with the original scene animations and a user-supplied Russian recording. Add `?lang=ru` for the Russian preview; English remains the default.
 
 ## Build and render
 
@@ -14,14 +14,14 @@ python3 analysis/verify_russian_render.py
 
 The output is `out/ru/pdoom-ru-v2.mp4`: 1920×1080, 60 fps, H.264 CRF 16, 12 temporal samples with a 0.5 shutter, and stereo AAC. The render script exports 15-second sections, verifies each frame count, resumes valid sections, and muxes the checked video with `audio/pdoom-ru-v2.m4a`. It invalidates cached sections when scene code, Russian fonts or plates, timing data, or the audio master changes. The verification script probes the final streams and fully decodes the file.
 
-For a browser preview, run `cd app && bunx vite`. For a single frame or a custom export, run from `app/`:
+For a browser preview, run `cd app && bunx vite` and open `http://localhost:5173/?lang=ru`. For a single frame or a custom export, run from `app/`:
 
 ```sh
 bun scripts/render.ts stills --lang ru --t 20,49,92,142,202 --out ../out/ru/stills
 bun scripts/render.ts video --lang ru --fps 60 --samples 12 --out ../out/ru/custom.mp4
 ```
 
-The renderer starts a private Vite server. Use `--lang en` to export the English edition.
+The renderer starts a private Vite server. Without `--lang ru`, it exports the original English edition.
 
 ## Source and timing
 
