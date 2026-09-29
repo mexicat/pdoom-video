@@ -1,4 +1,5 @@
-// Music analysis (data/audio.json) sampled at arbitrary song time.
+// Music analysis sampled at arbitrary song time.
+import { DATA_DIR } from '../edition';
 
 export interface AudioJSON {
   duration: number;
@@ -43,7 +44,7 @@ export class AudioData {
   }
 
   static async load(): Promise<AudioData> {
-    for (const url of ['data/audio.json', 'data/audio.approx.json']) {
+    for (const url of [`${DATA_DIR}/audio.json`, `${DATA_DIR}/audio.approx.json`]) {
       const r = await fetch(url);
       if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) return new AudioData(await r.json());
     }

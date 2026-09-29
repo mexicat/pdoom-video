@@ -1,6 +1,7 @@
 // Typography: font registry (Canvas2D via FontFace + outlines via opentype.js),
 // glyph layout, text outlines as Path2D, and point sampling of text for particle effects.
 import * as opentype from 'opentype.js';
+import { RUSSIAN } from '../edition';
 
 /**
  * Font keys. Archivo comes in static width instances (w = wdth*10) x weights so we can
@@ -22,6 +23,7 @@ for (const wt of [400, 600]) {
 for (const [n, f] of [['300', 'Light'], ['400', 'Regular'], ['500', 'Medium'], ['600', 'SemiBold'], ['700', 'Bold']] as const)
   DEFS.push({ family: `Plex-${n}`, file: `src/IBMPlexMono-${f}.ttf` });
 DEFS.push({ family: 'PlexItalic-400', file: 'src/IBMPlexMono-Italic.ttf' });
+for (const weight of [400, 600, 900]) DEFS.push({ family: `Russian-${weight}`, file: `ru/NotoSans-${weight}.ttf` });
 
 /** Convenience family names. */
 export const F = {
@@ -57,8 +59,8 @@ const bufCache = new Map<string, ArrayBuffer>();
 
 export async function loadFonts(): Promise<void> {
   await Promise.all(
-    DEFS.map(async (d) => {
-      const buf = await (await fetch(`fonts/${d.file}`)).arrayBuffer();
+    DEFS.filter(d => RUSSIAN || !d.family.startsWith('Russian-')).map(async (d) => {
+      const buf = await (await fetch(`fonts/${RUSSIAN && d.family.startsWith('Archivo') ? 'ru/' : ''}${d.file}`)).arrayBuffer();
       bufCache.set(d.family, buf);
       const ff = new FontFace(d.family, buf, d.features ? { featureSettings: d.features } : undefined);
       await ff.load();

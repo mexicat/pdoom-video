@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // FIG. 7 `bureau` — "Paperwork". Inverted palette: bone paper, ink, orange accents.
 // One long printed document seen by a restless camera:
 //   A. Form 7-B (safety evaluation): the lyric is typewritten into the fields; SAFE ENOUGH stamp slams on "reckoned".
@@ -249,7 +251,7 @@ export default class Bureau extends Scene {
     this.pdoom = new PDoom(lyrics);
 
     this.ink.texture.colorSpace = THREE.NoColorSpace;
-    const find = (l: Line, q: string, from = 0) => l.words.slice(from).find((w) => norm(w.w).startsWith(norm(q))) ?? l.words[Math.min(from, l.words.length - 1)]!;
+    const find = (l: Line, q: string, from = 0) => l.words.slice(from).find((w) => norm(w.source ?? w.w).startsWith(norm(q))) ?? l.words[Math.min(from, l.words.length - 1)]!;
     this.L1 = lyrics.get('safe enough');
     this.L2 = lyrics.get('Forward MLP');
     this.L3 = lyrics.get('Neumann');
@@ -324,8 +326,8 @@ export default class Bureau extends Scene {
       });
     }
 
-    this.sig = strokeText('We', 'script', 120);
-    this.obsHand = strokeText('obsolete', 'hscript', 124, 1);
+    this.sig = strokeText(RUSSIAN ? 'Мы' : 'We', 'script', 120);
+    this.obsHand = strokeText(RUSSIAN ? 'догнать' : 'obsolete', 'hscript', 124, 1);
     // hand-writing of "obsolete": starts with the word and must be done before the tear
     const wEnd = Math.min(this.wObs.end, this.tTear + 0.02);
     const n = this.obsHand.charRange.length;
@@ -416,7 +418,7 @@ export default class Bureau extends Scene {
     const s = this.syl;
     const snap = (k: number) => prog(t, s[k]![0] - 0.02, s[k]![0] + 0.2, ease.outExpo);
     const keysB: Cam[] = [
-      { x: -420, y: -60, z: 1.42, r: 0.02 },    // "Forward": tight on the input side
+      { x: -420, y: -60, z: 1.42, r: 0.02 },    // tr("Forward"): tight on the input side
       { x: -250, y: -30, z: 1.25, r: 0.01 },    // M
       { x: -60, y: -10, z: 1.12, r: -0.004 },   // L
       { x: -110, y: 5, z: 0.99, r: 0.006 },     // P: the whole schematic
@@ -435,7 +437,7 @@ export default class Bureau extends Scene {
   camC(t: number): Cam {
     // tight on the heading as it prints, reveal the figure on the downbeat, punch in on a beat, then the strikes
     const k = prog(t, this.tReveal - 0.04, this.tReveal + 0.34, ease.outExpo);
-    const tight: Cam = { x: C.x - 460 + 260 * prog(t, this.tNow, this.tReveal, ease.linear), y: C.y - 370, z: 1.7, r: -0.025 };
+    const tight: Cam = { x: C.x - 460 + 260 * prog(t, this.tNow, this.tReveal, ease.linear), y: C.y - 370, z: RUSSIAN ? 1.25 : 1.7, r: -0.025 };
     const wide: Cam = { x: C.x - 10, y: C.y - 40, z: 0.9, r: 0.01 };
     let cam = lerpCam(tight, wide, k);
     const punch: Cam = { x: C.x + 10, y: C.y - 20, z: 0.99, r: -0.004 };
@@ -573,17 +575,17 @@ export default class Bureau extends Scene {
     c.globalCompositeOperation = 'difference';
     c.fillStyle = PRINT(1);
     c.font = font(F.archivo(125, 900), 58);
-    c.fillText('FORM 7-B', x0 + 26, y0 + 68);
+    c.fillText(tr('FORM 7-B'), x0 + 26, y0 + 68);
     c.font = font(F.mono(600), 19);
     c.letterSpacing = '4px';
-    c.fillText('SAFETY EVALUATION OF A FRONTIER SYSTEM', x0 + 470, y0 + 42);
+    c.fillText(tr('SAFETY EVALUATION OF A FRONTIER SYSTEM'), x0 + 470, y0 + 42);
     c.font = font(F.mono(400), 15);
     c.letterSpacing = '3px';
-    c.fillText('ABRIDGED EDITION  ·  PLEASE TYPE OR PRINT CLEARLY', x0 + 470, y0 + 70);
+    c.fillText(tr('ABRIDGED EDITION  ·  PLEASE TYPE OR PRINT CLEARLY'), x0 + 470, y0 + 70);
     c.globalCompositeOperation = 'lighter';
 
     // meta row
-    const meta = [['ISSUED BY', 'DEPT. OF REASONABLE ASSURANCES'], ['REF.', '7B-0042/∞'], ['REVIEW TIME', '11 MIN'], ['PAGE', '1 OF 1']];
+    const meta = [[tr('ISSUED BY'), tr('DEPT. OF REASONABLE ASSURANCES')], [tr('REF.'), '7B-0042/∞'], [tr('REVIEW TIME'), tr('11 MIN')], [tr('PAGE'), tr('1 OF 1')]];
     let mx = x0;
     const mw = [520, 280, 320, 280];
     c.letterSpacing = '2px';
@@ -604,14 +606,14 @@ export default class Bureau extends Scene {
       c.letterSpacing = '0px';
     };
     // 1. FINDINGS (lyric typed here)
-    label('1.', 'FINDINGS', A.y - 210);
+    label('1.', tr('FINDINGS'), A.y - 210);
     c.fillStyle = PRINT(0.3);
     for (let i = 0; i < 2; i++) c.fillRect(x0 + 160, A.y - 105 + i * 64, x1 - x0 - 180, 1.2);
     c.fillStyle = PRINT(0.5); c.font = font(F.mono(400), 13);
-    c.fillText('(describe observed behaviour; attach additional sheets if the system asks you to)', x0 + 160, A.y - 205);
+    c.fillText(tr('(describe observed behaviour; attach additional sheets if the system asks you to)'), x0 + 160, A.y - 205);
     // 2. RISK LEVEL
-    label('2.', 'RISK LEVEL', A.y - 10);
-    const opts = ['LOW', 'MODERATE', 'HIGH', 'SAFE ENOUGH'];
+    label('2.', tr('RISK LEVEL'), A.y - 10);
+    const opts = [tr('LOW'), tr('MODERATE'), tr('HIGH'), tr('SAFE ENOUGH')];
     let ox = x0 + 290;
     c.font = font(F.mono(500), 21);
     c.letterSpacing = '2px';
@@ -631,31 +633,31 @@ export default class Bureau extends Scene {
     });
     c.letterSpacing = '0px';
     // 3. CONCLUSION
-    label('3.', 'CONCLUSION', A.y + 90);
+    label('3.', tr('CONCLUSION'), A.y + 90);
     c.fillStyle = PRINT(0.3);
     c.fillRect(x0 + 160, A.y + 155, 760, 1.2);
     // 4. signature
-    label('4.', 'SIGNATURE OF EVALUATOR(S)', A.y + 250);
+    label('4.', tr('SIGNATURE OF EVALUATOR(S)'), A.y + 250);
     c.fillStyle = PRINT(0.6);
     c.fillRect(x0 + 160, A.y + 360, 520, 1.2);
     c.font = font(F.mono(400), 12); c.letterSpacing = '2px';
-    c.fillText('SIGN HERE', x0 + 160, A.y + 380);
+    c.fillText(tr('SIGN HERE'), x0 + 160, A.y + 380);
     c.letterSpacing = '0px';
     // footnote
     c.fillStyle = PRINT(0.8); c.fillRect(x0, A.y + 415, x1 - x0, 1);
     c.fillStyle = PRINT(0.75);
     c.font = font(F.mono(400), 14);
-    c.fillText('* “Safe enough” is defined in Form 7-C, which has not been drafted. Do not detach.', x0 + 10, A.y + 445);
+    c.fillText(tr('* “Safe enough” is defined in Form 7-C, which has not been drafted. Do not detach.'), x0 + 10, A.y + 445);
     // 5. the P(doom) field, right under where the stamp lands
     {
       const fx = A.x + 230, fy = A.y + 452;
       c.fillStyle = PRINT(1);
       c.font = font(F.mono(700), 16); c.letterSpacing = '3px';
       c.fillText('5.', fx, fy);
-      c.fillText('EST. P(DOOM)', fx + 34, fy);
+      c.fillText(tr('EST. P(DOOM)'), fx + 34, fy);
       c.fillStyle = PRINT(0.55);
       c.font = font(F.mono(400), 12); c.letterSpacing = '2px';
-      c.fillText('(ROUND DOWN)', fx + 34, fy + 22);
+      c.fillText(tr('(ROUND DOWN)'), fx + 34, fy + 22);
       c.letterSpacing = '0px';
       c.fillStyle = PRINT(0.55);
       c.fillRect(A.x + 470, fy + 12, x1 - 20 - (A.x + 470), 1.2);
@@ -721,13 +723,13 @@ export default class Bureau extends Scene {
     c.fillStyle = ORANGE(1);
     c.textAlign = 'center';
     const fam = F.archivo(75, 900);
-    const size = Math.min(112, (100 * (hw * 2 - 70)) / measure('SAFE ENOUGH', fam, 100));
+    const size = Math.min(112, (100 * (hw * 2 - 70)) / measure(tr('SAFE ENOUGH'), fam, 100));
     c.font = font(fam, size);
-    c.fillText('SAFE ENOUGH', 0, size * 0.36);
+    c.fillText(tr('SAFE ENOUGH'), 0, size * 0.36);
     c.font = font(F.mono(700), 16);
     c.letterSpacing = '6px';
-    c.fillText('EVALUATED · WE RECKON', 0, -hh + 46);
-    c.fillText('DEPT. OF REASONABLE ASSURANCES', 0, hh - 30);
+    c.fillText(tr('EVALUATED · WE RECKON'), 0, -hh + 46);
+    c.fillText(tr('DEPT. OF REASONABLE ASSURANCES'), 0, hh - 30);
     c.letterSpacing = '0px';
     c.restore();
   }
@@ -742,9 +744,9 @@ export default class Bureau extends Scene {
     c.beginPath(); c.roundRect(-hw, -hh, hw * 2, hh * 2, 20); c.stroke();
     c.fillStyle = PRINT(1); c.textAlign = 'center';
     c.font = font(F.archivo(125, 900), 62);
-    c.fillText('FILED', 0, 12);
+    c.fillText(tr('FILED'), 0, 12);
     c.font = font(F.mono(600), 13); c.letterSpacing = '4px';
-    c.fillText('NO FURTHER ACTION', 0, hh - 14);
+    c.fillText(tr('NO FURTHER ACTION'), 0, hh - 14);
     c.letterSpacing = '0px';
     c.restore();
   }
@@ -755,7 +757,7 @@ export default class Bureau extends Scene {
     for (let x = -1400; x < 1400; x += 18) c.fillRect(x, y, 9, 1.4);
     c.font = font(F.mono(500), 13); c.letterSpacing = '4px';
     c.fillStyle = PRINT(0.6);
-    c.fillText('   DETACH HERE — RETAIN LOWER PORTION FOR YOUR RECORDS', -440, y - 12);
+    c.fillText(tr('   DETACH HERE — RETAIN LOWER PORTION FOR YOUR RECORDS'), -440, y - 12);
     c.letterSpacing = '0px';
     // the scissors (no font here has ✂), drawn in the first cell: two finger rings, crossed blades
     const sx = -440, sy = y - 16.5;
@@ -789,10 +791,10 @@ export default class Bureau extends Scene {
     // headers
     c.fillStyle = PRINT(1);
     c.font = font(F.mono(700), 17); c.letterSpacing = '4px';
-    c.fillText('ANNEX B — TRAINING PROCEDURE', -880, -540);
+    c.fillText(tr('ANNEX B — TRAINING PROCEDURE'), -880, -540);
     c.font = font(F.mono(400), 13); c.letterSpacing = '2px';
     c.fillStyle = PRINT(0.6);
-    c.fillText('SCHEMATIC · NOT TO SCALE · DO NOT OPERATE UNSUPERVISED', -880, -516);
+    c.fillText(tr('SCHEMATIC · NOT TO SCALE · DO NOT OPERATE UNSUPERVISED'), -880, -516);
     c.letterSpacing = '0px';
     c.fillStyle = PRINT(0.9); c.fillRect(-880, -500, 1760, 1.5);
 
@@ -850,7 +852,7 @@ export default class Bureau extends Scene {
         }
       });
       c.fillStyle = PRINT(0.8); c.font = font(F.mono(500), 14); c.letterSpacing = '3px'; c.textAlign = 'center';
-      c.fillText(['INPUT x', 'HIDDEN h₁', 'HIDDEN h₂', 'OUTPUT ŷ'][k]!, l.x, 262);
+      c.fillText([tr('INPUT x'), tr('HIDDEN h₁'), tr('HIDDEN h₂'), tr('OUTPUT ŷ')][k]!, l.x, 262);
       c.textAlign = 'left'; c.letterSpacing = '0px';
     });
     c.fillStyle = PRINT(0.75); c.font = font(F.serif(400, true), 32); c.textAlign = 'center';
@@ -864,9 +866,9 @@ export default class Bureau extends Scene {
 
     c.font = font(F.mono(500), 14); c.letterSpacing = '3px';
     c.fillStyle = PRINT(0.75);
-    c.fillText('FORWARD PASS  →', -470, -226);
+    c.fillText(tr('FORWARD PASS  →'), -470, -226);
     c.textAlign = 'right';
-    c.fillText('←  BACKWARD PASS  (∂L/∂w)', 860, -160);
+    c.fillText(tr('←  BACKWARD PASS  (∂L/∂w)'), 860, -160);
     c.textAlign = 'left'; c.letterSpacing = '0px';
 
     // epoch counter
@@ -892,12 +894,17 @@ export default class Bureau extends Scene {
     c.textBaseline = 'alphabetic';
     c.font = font(fam, size);
     // "Forward" over the input layer, printed L->R within the word
-    const fw = layout('Forward', fam, size);
-    const fx0 = Ls[0]!.x - fw.width / 2;
+    const fwSize = RUSSIAN ? 84 : size;
+    c.font = font(fam, fwSize);
+    const fw = layout(RUSSIAN ? this.wFwd.w : tr('Forward'), fam, fwSize);
+    const fx0 = Ls[0]!.x - fw.width / 2 + (RUSSIAN ? 80 : 0);
     const per = Math.min(0.06, (this.wFwd.end - this.wFwd.start) / fw.glyphs.length);
     for (const g of fw.glyphs) if (t >= this.wFwd.start + g.i * per) { c.fillStyle = PRINT(1); c.fillText(g.ch, fx0 + g.x, yTop); }
     // M, L, P over h1, h2, y-hat, each on its syllable
-    ['M', 'L', 'P'].forEach((ch, k) => {
+    if (RUSSIAN) {
+      c.font = font(fam, 112);
+      if(t >= this.wMLP.start) { c.fillStyle=PRINT(1); c.fillText(this.wMLP.w, Ls[2]!.x-measure(this.wMLP.w,fam,112)/2, yTop); }
+    } else ['M', 'L', 'P'].forEach((ch, k) => {
       const ts = this.syl[k]![0];
       if (t < ts) return;
       const w = measure(ch, fam, size);
@@ -944,11 +951,11 @@ export default class Bureau extends Scene {
       c.translate(rx + 200, 372);
       c.scale(1 + 0.14 * pop, 1 + 0.14 * pop);
       c.fillStyle = PRINT(1);
-      c.fillText('repeat', -200, 0);
+      c.fillText((RUSSIAN ? 'опять' : 'repeat'), -200, 0);
       c.restore();
       if (loop >= 0 && loop < 3) {
         c.fillStyle = ORANGE(1); c.font = font(F.mono(700), 24); c.letterSpacing = '3px';
-        c.fillText(`×${loop + 1}`, rx + measure('repeat', fam, 116) + 24, 372);
+        c.fillText(`×${loop + 1}`, rx + measure((RUSSIAN ? 'опять' : 'repeat'), fam, 116) + 24, 372);
         c.letterSpacing = '0px';
       }
     }
@@ -961,7 +968,7 @@ export default class Bureau extends Scene {
     c.translate(C.x, C.y);
     c.textBaseline = 'alphabetic';
     c.fillStyle = PRINT(0.7); c.font = font(F.mono(500), 16); c.letterSpacing = '4px';
-    c.fillText('APPENDIX C — LEGACY ARCHITECTURES (FOR REFERENCE ONLY)', -820, -482);
+    c.fillText(tr('APPENDIX C — LEGACY ARCHITECTURES (FOR REFERENCE ONLY)'), -820, -482);
     c.letterSpacing = '0px';
     c.fillStyle = PRINT(0.9); c.fillRect(-820, -467, 1640, 1.5);
     // heading: the lyric, printed word by word
@@ -1037,6 +1044,7 @@ export default class Bureau extends Scene {
       if (hot > 0) { c.fillStyle = PRINT(0.08 * hot); c.fillRect(x + 6, y + 6, w - 12, h - 12); }
       c.fillStyle = PRINT(1); c.textAlign = 'center';
       c.font = font(F.mono(600), 19); c.letterSpacing = '3px';
+      if(RUSSIAN && c.measureText(title).width>w-28){ c.letterSpacing='1px'; c.font=font(F.mono(600),Math.min(19,(w-28-title.length)/layout(title,F.mono(600),1).width)); }
       c.fillText(title, x + w / 2, y + h / 2 + (sub ? -4 : 7));
       if (sub) { c.font = font(F.mono(400), 14); c.fillStyle = PRINT(0.65); c.fillText(sub, x + w / 2, y + h / 2 + 22); }
       c.textAlign = 'left'; c.letterSpacing = '0px';
@@ -1062,31 +1070,31 @@ export default class Bureau extends Scene {
     shadowHatch(cx, cy, cw, ch, 15);
     c.strokeStyle = PRINT(1); c.lineWidth = 3; c.strokeRect(cx, cy, cw, ch);
     c.fillStyle = PRINT(1); c.font = font(F.mono(700), 18); c.letterSpacing = '4px';
-    c.fillText('CENTRAL PROCESSING UNIT', cx + 20, cy + 34);
+    c.fillText(tr('CENTRAL PROCESSING UNIT'), cx + 20, cy + 34);
     c.letterSpacing = '0px';
-    box(cx + 40, cy + 70, 270, 100, 'CONTROL UNIT', 'decode', hot(1));
-    box(cx + 350, cy + 70, 270, 100, 'ALU', 'arithmetic / logic', hot(2));
-    box(cx + 40, cy + 200, 580, 90, 'REGISTERS', 'PC · IR · ACC · MAR · MDR', hot(3));
+    box(cx + 40, cy + 70, 270, 100, tr('CONTROL UNIT'), 'decode', hot(1));
+    box(cx + 350, cy + 70, 270, 100, 'ALU', tr('arithmetic / logic'), hot(2));
+    box(cx + 40, cy + 200, 580, 90, tr('REGISTERS'), 'PC · IR · ACC · MAR · MDR', hot(3));
     shadowHatch(-330, 225, 660, 115);
-    box(-330, 225, 660, 115, 'MEMORY UNIT', 'instructions + data, one bus', hot(0));
+    box(-330, 225, 660, 115, tr('MEMORY UNIT'), tr('instructions + data, one bus'), hot(0));
     shadowHatch(-790, -135, 260, 150);
-    box(-790, -135, 260, 150, 'INPUT', 'device');
+    box(-790, -135, 260, 150, tr('INPUT'), 'device');
     shadowHatch(530, -135, 260, 150);
-    box(530, -135, 260, 150, 'OUTPUT', 'device');
+    box(530, -135, 260, 150, tr('OUTPUT'), 'device');
     arrow(-530, -60, cx - 4, -60);
     arrow(cx + cw + 4, -60, 526, -60);
     arrow(-60, cy + ch + 4, -60, 221, true);
     arrow(60, cy + ch + 4, 60, 221, true);
     c.fillStyle = PRINT(0.8); c.font = font(F.serif(400, true), 30);
-    c.fillText('the bottleneck', 100, 180);
+    c.fillText(tr('the bottleneck'), 100, 180);
     // the instruction token shuttling over the bus, one trip per beat
     const u = bt - Math.floor(bt);
     const up = Math.floor(bt) % 2 === 0;
     const ty = up ? lerp(215, 118, ease.inOutCubic(u)) : lerp(118, 215, ease.inOutCubic(u));
     c.fillStyle = PRINT(1); c.fillRect(up ? -70 : 50, ty - 8, 20, 16);
     c.fillStyle = PRINT(0.85); c.font = font(F.serif(400, true), 30);
-    c.fillText('Fig. C.1 — The stored-program computer (1945).', 372, 262);
-    c.fillText('One memory, one bus, one thing at a time.', 372, 298);
+    c.fillText(tr('Fig. C.1 — The stored-program computer (1945).'), 372, 262);
+    c.fillText(tr('One memory, one bus, one thing at a time.'), 372, 298);
   }
 
   override dispose() {

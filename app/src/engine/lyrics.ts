@@ -1,7 +1,10 @@
 // Word-timed lyrics (data/lyrics.json) with queries for karaoke rendering.
+import { originalText } from '../ru/strings';
 import { smart } from './type';
+import { DATA_DIR } from '../edition';
 
 export interface Word {
+  source?: string;
   w: string; // display token (punctuation attached, typographic quotes: don’t, ’cause)
   start: number;
   end: number;
@@ -13,6 +16,7 @@ export interface Word {
   gi: number; // global word index
 }
 export interface Line {
+  source?: string;
   i: number;
   text: string;
   start: number;
@@ -37,7 +41,7 @@ export class Lyrics {
   }
 
   static async load(): Promise<Lyrics> {
-    for (const url of ['data/lyrics.json', 'data/lyrics.approx.json']) {
+    for (const url of [`${DATA_DIR}/lyrics.json`, `${DATA_DIR}/lyrics.approx.json`]) {
       const r = await fetch(url);
       if (r.ok && (r.headers.get('content-type') ?? '').includes('json')) return new Lyrics(await r.json());
     }
@@ -62,8 +66,8 @@ export class Lyrics {
   }
   /** Lines whose text includes `s` (case-insensitive, straight or curly quotes). Handy for finding a lyric by content. */
   find(s: string): Line[] {
-    const q = fold(s);
-    return this.lines.filter((l) => fold(l.text).includes(q));
+    const q = fold(originalText(s));
+    return this.lines.filter((l) => fold(l.source ?? l.text).includes(q));
   }
   /** First line containing `s`; throws if missing (fail loudly while authoring). */
   get(s: string, nth = 0): Line {
@@ -82,7 +86,7 @@ export class Lyrics {
   /** Words whose normalized text matches (e.g. 'p(doom)'). */
   findWords(s: string): Word[] {
     const q = norm(s);
-    return this.words.filter((w) => norm(w.w) === q);
+    return this.words.filter((w) => norm(w.source ?? w.w) === q);
   }
 
   /**
@@ -117,5 +121,5 @@ export class Lyrics {
   }
 }
 
-export const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9()]/g, '');
+export const norm = (s: string) => s.toLowerCase().replace(/[^\p{L}\p{N}()]/gu, '');
 const fold = (s: string) => s.toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"');

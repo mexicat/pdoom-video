@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // dense, movement 4: "RLHF goes askew". The whole frame goes off-kilter, beat by beat.
 //  - The world is a tilting table: its horizon (the lyric's baseline) rolls clockwise in steps on
 //    the kicks, each step caught by a spring. RLHF tries to correct it once (the roll snaps back
@@ -233,7 +234,7 @@ export class Askew {
     this.layR = layout(this.letters(this.wR).join(''), F.archivo(100, 900), RLHF.size);
   }
 
-  private letters(w: Word) { return w.w.replace(/[^A-Za-z]/g, '').toUpperCase().split(''); }
+  private letters(w: Word) { return w.w.replace(/[^\p{L}]/gu, '').toUpperCase().split(''); }
 
   roll(t: number) { return stepped(t, this.rollK, 3.0, 0.42); }
   private lean(t: number) { return stepped(t, this.leanK, 2.0, 0.3); }
@@ -352,7 +353,7 @@ export class Askew {
       c.beginPath(); c.moveTo(0, p.y + 0.5); c.lineTo(W, p.y + 0.5); c.stroke();
       c.setLineDash([]);
       c.font = font(F.mono(400), 11); c.letterSpacing = '2px'; c.fillStyle = rgba('bone', 0.55 * a);
-      c.textAlign = 'right'; c.fillText('TRUE LEVEL', W - 110, p.y - 9);
+      c.textAlign = 'right'; c.fillText(tr('TRUE LEVEL'), W - 110, p.y - 9);
     } else {
       const r = 300;
       // the arc and readout sit in the free wedge under the horizon: left of the crossing when the
@@ -370,7 +371,7 @@ export class Askew {
       const tx = p.x + sd * (r + 16), ty = p.y + 12 + (sd > 0 ? Math.abs(Math.tan(roll)) * (r + 16) : 0);
       c.fillText(`${deg >= 0 ? '+' : '\u2212'}${Math.abs(deg).toFixed(1).padStart(4, '0')}\u00B0`, tx, ty);
       c.font = font(F.mono(400), 11); c.letterSpacing = '2px'; c.fillStyle = rgba('bone', 0.6 * a);
-      c.fillText('ROLL', tx, ty + 28);
+      c.fillText(tr('ROLL'), tx, ty + 28);
     }
     c.restore();
   }
@@ -532,7 +533,7 @@ export class Askew {
     c.fillStyle = rgba('ink', 0.92); c.fillRect(x, y, w, h);
     c.strokeStyle = rgba('bone', 0.35); c.lineWidth = 1; c.strokeRect(x + 0.5, y + 0.5, w, h);
     c.font = font(F.mono(500), 13); c.letterSpacing = '3px'; c.fillStyle = rgba('bone', 0.6);
-    c.fillText('REWARD MODEL', x + 18, y + 27);
+    c.fillText(tr('REWARD MODEL'), x + 18, y + 27);
     c.letterSpacing = '0px';
     c.font = font(F.mono(500), 46);
     const bad = r < 0.7;

@@ -2,6 +2,7 @@
 // so text can be *written* progressively by a moving point (the spark). The fonts carry no kerning
 // and no curly quotes: pairs are kerned optically (see `pairKern`) and ’ ‘ “ ” … are built from their
 // own ' and . glyphs.
+import { RUSSIAN } from '../edition';
 import { type V2, polylineLengths } from './util';
 
 export const STROKE_FONTS = {
@@ -31,11 +32,20 @@ interface SFont {
 const fonts = new Map<StrokeFontName, SFont>();
 
 export async function loadStrokeFonts() {
+  const cyrillic = RUSSIAN ? await (await fetch('fonts/ru/stroke.json')).json() : null;
   await Promise.all(
     (Object.keys(STROKE_FONTS) as StrokeFontName[]).map(async (k) => {
       const txt = await (await fetch(`fonts/stroke/${STROKE_FONTS[k]}`)).text();
       const f = parseSvgFont(txt);
       addTypographic(f);
+      if (cyrillic) {
+        const src = cyrillic[SCRIPTS.has(k) ? 'script' : 'sans'];
+        const scale = (f.capTop - f.base) / src.cap;
+        for (const [ch, value] of Object.entries(src.glyphs)) {
+          const g = value as SGlyph;
+          f.glyphs.set(ch, {adv:g.adv*scale,strokes:g.strokes.map(st=>st.map(p=>({x:p.x*scale,y:p.y*scale+f.base})))});
+        }
+      }
       fonts.set(k, f);
     }),
   );

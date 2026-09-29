@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // B1 `open` — "Sparks of AGI": the unicorn, as a construction drawing.
 // Black. On the first downbeat the pen (the spark) strikes and shoots out the axes; the camera pulls
 // back over a TikZ graph-paper sheet while a compass sweeps the first circle. The pen builds a
@@ -111,7 +113,7 @@ export default class OpenScene extends Scene {
     this.L3 = ly.get('no surprise');
     const find = (l: Line, q: string) => {
       const n = norm(q);
-      const x = l.words.find((y) => norm(y.w) === n);
+      const x = l.words.find((y) => norm(y.source ?? y.w) === n);
       if (!x) throw new Error(`open: word not found: ${q}`);
       return x;
     };
@@ -154,7 +156,7 @@ export default class OpenScene extends Scene {
       let cx = x;
       const sp = (layout(' ', fam, 100).width / 100) * em;
       words.forEach((wd, i) => {
-        const tx = text[i] ?? wd.w;
+        const tx = RUSSIAN ? wd.w : text[i] ?? wd.w;
         const lay = layout(tx, fam, 100);
         this.words.push({ w: wd, text: tx, x: cx, y, em, fam, lay, group, tAnt: wd.start - ant });
         cx += (lay.width / 100) * em + sp;
@@ -178,22 +180,22 @@ export default class OpenScene extends Scene {
     const colW = 5.9;
     // line 1: "AGI" is anchored right above the horn's tip; "I see sparks of" sits on top of it
     const emAGI = fit('AGI', colW, 2.45);
-    const emR1 = fit('I see sparks of', colW, 1.25);
+    const emR1 = fit((RUSSIAN ? "В глазах твоих —" : 'I see sparks of'), colW, 1.25);
     const yAGI = 3.18;
     const yR1 = yAGI + CAP * emAGI + GAP + DESC * emR1;
     place([w.I!, w.see!, w.sparks!, w.of!], ['I', 'see', 'sparks', 'of'], COLX, yR1, emR1, 'l1');
     place([w.AGI!], ['AGI'], COLX - 0.06 * emAGI, yAGI, emAGI, 'l1');
-    place([w.in!, w.your!], ['in', 'your'], COLX, 2.28, 0.5, 'l1e', 0.25);
+    place([w.in!, w.your!], ['in', 'your'], COLX, 2.28, RUSSIAN ? 0.25 : 0.5, 'l1e', 0.25);
     place([w.eyes!], ['eyes'], COLX, 1.62, 0.5, 'l1e', 0.2);
     // line 2 under it
-    const r2 = stack([['Your circuits', 1.25], ['make me', 1.5], ['nervous,', 1.9]], 0.55, colW);
+    const r2 = stack([[(RUSSIAN ? "Смотрю в твой код" : 'Your circuits'), 1.25], [(RUSSIAN ? "— и" : 'make me'), 1.5], [(RUSSIAN ? "жутко," : 'nervous,'), 1.9]], 0.55, colW);
     place([w.Your!, w.circuits!], ['Your', 'circuits'], COLX, r2[0]!.y, r2[0]!.em, 'l2');
     place([w.make!, w.me!], ['make', 'me'], COLX, r2[1]!.y, r2[1]!.em, 'l2');
-    place([w.nervous!], ['nervous,'], COLX - 0.04, r2[2]!.y, r2[2]!.em, 'l2');
+    place([w.nervous!], [(RUSSIAN ? "жутко," : 'nervous,')], COLX - 0.04, r2[2]!.y, r2[2]!.em, 'l2');
     // line 3 on the left of the figure, with the surprisal underneath
-    const r3 = stack([['that’s no', 1.45], ['surprise', 1.45]], 2.75, 5.3);
+    const r3 = stack([[(RUSSIAN ? "Хоть прочь" : 'that’s no'), 1.45], [(RUSSIAN ? "беги." : 'surprise'), 1.45]], 2.75, 5.3);
     place([w.thats!, w.no!], ['that’s', 'no'], this.eq.x, r3[0]!.y, r3[0]!.em, 'l3');
-    place([w.surprise!], ['surprise'], this.eq.x, r3[1]!.y, r3[1]!.em, 'l3');
+    place([w.surprise!], [(RUSSIAN ? "беги." : 'surprise')], this.eq.x, r3[1]!.y, r3[1]!.em, 'l3');
     this.eq = pt(this.eq.x + 0.03, r3[1]!.y - DESC * r3[1]!.em - 0.42);
     this.row1 = { y: yR1, em: emR1 };
   }
@@ -355,7 +357,7 @@ export default class OpenScene extends Scene {
     this.note('x', 14.55, 0.16, t0 + 0.4, { em: 0.2, col: 'ash', group: 'axes' });
     this.note('y', 0.14, 8.55, t0 + 0.4, { em: 0.2, col: 'ash', group: 'axes' });
     // the prompt, deadpan, typed while we pull back
-    this.note('% prompt: "Draw a unicorn in TikZ."', -3.98, 2.36, t0 + 0.12, { em: 0.155, col: 'bone', a: 0.85, dur: 0.42, group: 'prompt', maxPx: 60 });
+    this.note(tr('% prompt: "Draw a unicorn in TikZ."'), -3.98, 2.36, t0 + 0.12, { em: 0.155, col: 'bone', a: 0.85, dur: 0.42, group: 'prompt', maxPx: 60 });
     this.note('\\begin{tikzpicture}', -3.98, 2.14, t0 + 0.5, { em: 0.13, col: 'ash', dur: 0.12, group: 'prompt', maxPx: 60 });
     // ignition ring
     S(arc(0, 0, 0.35, 0, TAU, 96), t0, t0 + 0.02, 'ring', { alpha: 1, width: 1.2, group: 'ring' });
@@ -412,7 +414,7 @@ export default class OpenScene extends Scene {
     this.dimension(pt(ex0, ey0 - 0.14), pt(ex1, ey0 - 0.14), `adv ${(ex1 - ex0).toFixed(2)}`, tI + 0.45, 'typel', 0.075);
     this.note('LSB', (ex0 + gb.x0) / 2, ey1 + 0.04, tI + 0.5, { em: 0.065, col: 'ash', align: 'center', group: 'typel' });
     this.note('RSB', (ex1 + gb.x1) / 2, ey1 + 0.04, tI + 0.52, { em: 0.065, col: 'ash', align: 'center', group: 'typel' });
-    this.note('U+0049  LATIN CAPITAL LETTER I', ex0, ey1 + 0.62, tI + 0.36, { em: 0.09, col: 'bone', a: 0.75, group: 'typel', dur: 0.25 });
+    this.note(tr('U+0049  LATIN CAPITAL LETTER I'), ex0, ey1 + 0.62, tI + 0.36, { em: 0.09, col: 'bone', a: 0.75, group: 'typel', dur: 0.25 });
     this.note('Archivo 700 · wdth 100', ex0, ey1 + 0.47, tI + 0.42, { em: 0.075, col: 'ash', group: 'typel', dur: 0.2 });
     this.note(`\\fill (${gb.x0.toFixed(2)},${gb.y0.toFixed(2)}) rectangle ++(${(gb.x1 - gb.x0).toFixed(2)},${(gb.y1 - gb.y0).toFixed(2)}); % I`, gb.x0 - 0.02, gb.y0 - 0.3, tI + 0.22, { em: 0.13, col: 'ash', group: 'lyricI', dur: 0.3 });
 
@@ -450,13 +452,13 @@ export default class OpenScene extends Scene {
     S(horn.slice(0, ia + 1), sa[0] - 0.01, sa[0] + 0.06, 'prim', { pen: true, ez: ez.outQuad, group: 'u1', width: 1.9 });
     S(horn.slice(ia), sa[0] + 0.06, sa[0] + 0.2, 'prim', { pen: true, ez: ez.inOutQuad, group: 'u1', width: 1.9 });
     S(line(pt(2.77, 2.25), pt(3.72, 4.45)), sa[0] - 0.03, sa[0] + 0.1, 'cons', { alpha: 0.45, dash: 6, group: 'cons' });
-    this.note('% horn', 2.2, 3.12, sa[0] + 0.08, { em: 0.12, col: 'signal', a: 1, group: 'code', align: 'right' });
+    this.note(tr('% horn'), 2.2, 3.12, sa[0] + 0.08, { em: 0.12, col: 'signal', a: 1, group: 'code', align: 'right' });
     const hb0 = horn[0]!, hap = horn[ia]!, hb1 = horn[hornBaseR(horn)]!;
     for (let k = 1; k <= 7; k++) {
       const f = k / 8, g = Math.min(1, f + 0.08);
       S([pt(lerp(hb0.x, hap.x, f), lerp(hb0.y, hap.y, f)), pt(lerp(hb1.x, hap.x, g), lerp(hb1.y, hap.y, g))], sg[0] + k * 0.018, sg[0] + k * 0.018 + 0.05, 'hatch', { width: 1.1, group: 'u1h' });
     }
-    this.note('spiral, 7 turns', 2.2, 2.93, si[0], { em: 0.12, col: 'ash', group: 'code', align: 'right' });
+    this.note(tr('spiral, 7 turns'), 2.2, 2.93, si[0], { em: 0.12, col: 'ash', group: 'code', align: 'right' });
 
     // ---- the tail: the pen crosses the sheet for it
     const tT = B(6);
@@ -464,7 +466,7 @@ export default class OpenScene extends Scene {
 
     // ---- the TikZ listing (top-left of the sheet): each line lights up as its primitive is plotted
     const lst: [string, number][] = [
-      ['% prompt: "Draw a unicorn in TikZ."', B(0) + 0.12],
+      [tr('% prompt: "Draw a unicorn in TikZ."'), B(0) + 0.12],
       ['\\begin{tikzpicture}', B(0) + 0.5],
       ['\\draw (0,0) ellipse (2 and 1);     % body', tB],
       ['\\foreach \\x in {-1.5,-1,0.85,1.35}', tL],
@@ -485,11 +487,11 @@ export default class OpenScene extends Scene {
     for (let r = 1; r < 3; r++) S(line(pt(tbx, tby - r * rh), pt(tbx + tbw, tby - r * rh)), tt + 0.1, tt + 0.25, 'cons', { alpha: 0.5, group: 'title' });
     S(line(pt(tbx + 2.3, tby - rh), pt(tbx + 2.3, tby - 3 * rh)), tt + 0.15, tt + 0.28, 'cons', { alpha: 0.5, group: 'title' });
     const cell = (txt: string, x: number, r: number, d: number, col = 'ash') => this.note(txt, tbx + x, tby - r * rh - 0.23, tt + d, { em: 0.13, col, group: 'title', dur: 0.15 });
-    cell('TITLE   unicorn (exp. 1)', 0.1, 0, 0.2, 'bone');
-    cell('DRAWN   the model', 0.1, 1, 0.25);
-    cell('CHECKED —', 2.4, 1, 0.3);
-    cell('SCALE   1:1', 0.1, 2, 0.35);
-    cell('SHEET   1 of 1', 2.4, 2, 0.4);
+    cell(tr('TITLE   unicorn (exp. 1)'), 0.1, 0, 0.2, 'bone');
+    cell(tr('DRAWN   the model'), 0.1, 1, 0.25);
+    cell(tr('CHECKED —'), 2.4, 1, 0.3);
+    cell(tr('SCALE   1:1'), 0.1, 2, 0.35);
+    cell(tr('SHEET   1 of 1'), 2.4, 2, 0.4);
 
     // ---- the eye: the pen hovers through "in your", dots it on "eyes"
     const E = this.eye;
@@ -526,7 +528,7 @@ export default class OpenScene extends Scene {
       pgLine.push(pt(pg.x + (i / 240) * 3.6, pg.y + amp * (0.65 * noise1(i * 0.9, 3) + 0.35 * noise1(i * 3.1, 4))));
     }
     this.polygraph = this.addStroke(pgLine, this.tNerv - 0.04, this.tNervEnd, 'plot', { pen: true, width: 1.3, group: 'poly' });
-    this.note('% tremor', pg.x, pg.y + 0.38, this.tNerv, { em: 0.13, col: 'ash', group: 'poly' });
+    this.note(tr('% tremor'), pg.x, pg.y + 0.38, this.tNerv, { em: 0.13, col: 'ash', group: 'poly' });
     // "that's no surprise": to the surprisal line, then the pen follows the typing
     this.wp(pt(this.eq.x - 0.05, this.eq.y + 0.1), w.surprise!.start + 0.02, 0.01);
     S([pt(this.eq.x - 0.05, this.eq.y - 0.1), pt(this.eq.x + 5.3, this.eq.y - 0.1)], w.surprise!.start + 0.03, w.surprise!.start + 0.3, 'ghost', { pen: true, alpha: 0 });

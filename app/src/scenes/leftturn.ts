@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // "Trajectory, revised". Verse 3, part 2. One continuous drawing sheet, the camera never at rest.
 //  1. "Sharp left turn": a top-down engineering roadmap (SRR · PDR · CDR · TRR · LAUNCH); the
 //     spark runs the planned route, lyrics painted on it as road markings; on "left" it swerves
@@ -28,7 +30,7 @@ import { PDoom, formatPDoom } from '../engine/hud';
 
 function wordOf(l: Line, s: string): Word {
   const q = norm(s);
-  return l.words.find((w) => norm(w.w).includes(q)) ?? l.words[0]!;
+  return l.words.find((w) => norm(w.source ?? w.w).includes(q)) ?? l.words[0]!;
 }
 
 type Cam = { x: number; y: number; rot: number; zoom: number };
@@ -88,7 +90,7 @@ export default class LeftTurn extends Scene {
     T.drain0 = beatBefore(this.ctx.end - 0.05);
     T.beats = [];
     for (let b = Math.floor(au.beatAt(T.without - 1)); au.timeOfBeat(b) < this.ctx.end + 1; b++) T.beats.push(au.timeOfBeat(b));
-    const head = T.l6.words.filter((w) => norm(w.w) !== 'cdr');
+    const head = T.l6.words.filter((w) => norm(w.source ?? w.w) !== 'cdr');
     this.sch = new Schedule({
       t0: T.without, words: head, cdr, syl: T.cdrSyl, SRR, PDR, TRR, LAUNCH: T.launch,
       zip0: T.launch - 0.24, beats: T.beats, downbeats: au.downbeats.filter((d) => d > T.without - 1 && d < this.ctx.end + 1),
@@ -334,7 +336,7 @@ export default class LeftTurn extends Scene {
   }
 
   // ---------------------------------------------------------------- overlay drawings
-  /** "PASSED" beside the checks on the planned route. */
+  /** tr("PASSED") beside the checks on the planned route. */
   drawStamps(c: CanvasRenderingContext2D, t: number) {
     const T = this.T;
     const stamp = (i: number, t0: number) => {
@@ -344,7 +346,7 @@ export default class LeftTurn extends Scene {
       const a = prog(e, 0, 0.03) * (1 - prog(e, 0.5, 0.8));
       c.save(); c.translate(MAP.PX - 132, m.y - 70); c.rotate(-0.08);
       c.font = font(F.mono(600), 20); c.fillStyle = rgba('signal', a); c.textAlign = 'center';
-      c.fillText('PASSED', 0, 0);
+      c.fillText(tr('PASSED'), 0, 0);
       c.restore();
     };
     stamp(0, T.sharp);
@@ -358,7 +360,7 @@ export default class LeftTurn extends Scene {
     c.font = font(fam, size);
     c.fillStyle = rgba('ash', 0.75);
     c.textAlign = 'center';
-    const lay = layout('Terra incognita', fam, size);
+    const lay = layout(tr('Terra incognita'), fam, size);
     const R = FACE.r * 0.8;
     const a0 = -Math.PI / 2 - (lay.width / R) / 2;
     // glyphs at their kerned positions along the arc (the T–e kern tucks the e under the T's arm)
@@ -429,8 +431,8 @@ export default class LeftTurn extends Scene {
       c.fillText(text, 0, size * 0.36);
       c.restore();
     };
-    stampWord(wYou, 'YOU', FACE.x, FACE.y - FACE.r * 0.5, 250);
-    stampWord(wAre, 'ARE', FACE.x, FACE.y + FACE.r * 0.72, 250);
+    stampWord(wYou, RUSSIAN ? 'И' : 'YOU', FACE.x, FACE.y - FACE.r * 0.5, 250);
+    stampWord(wAre, RUSSIAN ? 'ПРИВЕТ' : 'ARE', FACE.x, FACE.y + FACE.r * 0.72, 250);
 
     // deadpan callout, filed on the snare
     const ca = prog(t, T.call - 0.01, T.call + 0.04);
@@ -447,9 +449,9 @@ export default class LeftTurn extends Scene {
       c.beginPath(); c.arc(ex, ey, 5 * px, 0, Math.PI * 2); c.fill();
       c.textAlign = 'right';
       c.font = font(F.mono(600), 68); c.fillStyle = rgba('bone', 1);
-      c.fillText('UNPLANNED OBJECT', lx, ly - 26);
+      c.fillText(tr('UNPLANNED OBJECT'), lx, ly - 26);
       c.font = font(F.mono(400), 50); c.fillStyle = rgba('ash', 1);
-      c.fillText('not on roadmap', lx, ly + 66);
+      c.fillText(tr('not on roadmap'), lx, ly + 66);
       c.restore();
     }
   }

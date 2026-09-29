@@ -2,6 +2,8 @@
 import { Engine, type AdaptiveSampling } from './engine/engine';
 import { PW, PH, SCALE } from './engine/gl';
 import { makeTimeline } from './timeline';
+import { makeRussianTimeline, toRecordingTime } from './ru/timeline';
+import { RUSSIAN, AUDIO_FILE } from './edition';
 
 const params = new URLSearchParams(location.search);
 const EXPORT = params.has('export');
@@ -13,7 +15,9 @@ const canvas = document.getElementById('c') as HTMLCanvasElement;
 canvas.width = PW;
 canvas.height = PH;
 
-const engine = new Engine(canvas, makeTimeline);
+const engine = new Engine(canvas, RUSSIAN ? makeRussianTimeline : makeTimeline);
+document.documentElement.lang = RUSSIAN ? 'ru' : 'en';
+document.title = RUSSIAN ? 'Повышен риск конца — P(doom)' : "I'm Upping My P(doom)";
 
 declare global {
   interface Window { __pdoom: any }
@@ -35,6 +39,7 @@ function setupExport() {
   window.__pdoom = {
     engine,
     duration: engine.duration,
+    sourceTime: (t: number) => RUSSIAN ? toRecordingTime(t) : t,
     errors: engine.errors,
     /** Output size in px (1920x1080 times scale); stream() sends frames of width*height*4 bytes. */
     scale: SCALE,
@@ -95,7 +100,7 @@ function setupExport() {
 
 // ------------------------------------------------------------------ preview player
 function setupPlayer() {
-  const audio = new Audio('audio/pdoom.mp3');
+  const audio = new Audio(AUDIO_FILE);
   audio.preload = 'auto';
   const ui = document.getElementById('ui')!;
   const scrub = document.getElementById('scrub') as HTMLInputElement;
@@ -112,7 +117,7 @@ function setupPlayer() {
     m.style.left = `${(e.start / engine.duration) * 100}%`;
     m.style.width = `${((e.end - e.start) / engine.duration) * 100}%`;
     m.title = `${e.id} ${e.start.toFixed(2)}–${e.end.toFixed(2)}`;
-    m.textContent = e.id;
+    m.textContent = e.params?.title ?? e.id;
     m.onclick = () => seek(e.start);
     marks.appendChild(m);
   }
@@ -159,7 +164,7 @@ function setupPlayer() {
     if (now - fpsT > 500) { fps = (frames * 1000) / (now - fpsT); frames = 0; fpsT = now; }
     const e = TIMELINE.find((x) => t >= x.start && t < x.end);
     const l = engine.lyrics.lineAt(t);
-    info.textContent = `${t.toFixed(2)}s  beat ${engine.audio.beatAt(t).toFixed(2)}  bar ${engine.audio.barAt(t).toFixed(2)}  [${e?.id ?? '—'}]  ${fps.toFixed(0)}fps   ${l ? '“' + l.text + '”' : ''}${loop ? '  LOOP' : ''}`;
+    info.textContent = `${t.toFixed(2)}${RUSSIAN ? 'с' : 's'}  ${RUSSIAN ? 'доля' : 'beat'} ${engine.audio.beatAt(t).toFixed(2)}  ${RUSSIAN ? 'такт' : 'bar'} ${engine.audio.barAt(t).toFixed(2)}  [${e?.params?.title ?? e?.id ?? '—'}]  ${fps.toFixed(0)}fps   ${l ? '«' + l.text + '»' : ''}${loop ? (RUSSIAN ? '  ПОВТОР' : '  LOOP') : ''}`;
     requestAnimationFrame(tick);
   };
   requestAnimationFrame(tick);

@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 14 — "What was seen" (revision 2: no eye, no index of plates).
 // The Droste of FIG. 13 bottoms out in one screen, seen from behind in a dark room: we only see its
 // glow and what it lights. "What did Ilya see?": the camera circles round to the front; whatever is on
@@ -117,7 +118,7 @@ export default class IlyaScene extends Scene {
       c.font = font(F.mono(500), 12);
       c.letterSpacing = '3px';
       c.fillStyle = rgba('signal', 0.9 * prog(t, T.knowBar + 0.1, T.knowBar + 0.2));
-      c.fillText('WITHHELD', bx, by + bh + 20);
+      c.fillText(tr('WITHHELD'), bx, by + bh + 20);
     }
     c.restore();
   }

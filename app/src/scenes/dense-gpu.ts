@@ -24,12 +24,14 @@ export class GpuFloor {
     const top = 44, bot = 206; // keep the lyric inside the rows that stay on screen at full view
     const lineH = (bot - top) / rows;
     words.forEach((w, wi) => {
+      w=w.replace(/\s+/g,'\u2002');
       c.clearRect(0, 0, GX, GY);
       c.fillStyle = '#fff';
       let size = lineH * 1.05;
       c.font = font(fam, size);
       let mw = c.measureText(w).width;
-      if (mw > GX * 0.86) { size *= (GX * 0.86) / mw; c.font = font(fam, size); mw = c.measureText(w).width; }
+      const widthBudget=wi===2 && /\s/.test(w) ? .67 : .86;
+      if (mw > GX * widthBudget) { size *= (GX * widthBudget) / mw; c.font = font(fam, size); mw = c.measureText(w).width; }
       const x0 = Math.round((GX - mw) / 2);
       const base = Math.round(top + lineH * (wi + 1) - lineH * 0.1);
       c.fillText(w, x0, base);

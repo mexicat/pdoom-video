@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // FIG. 9 — "Paperclips, filling a room" (chorus 3, the quiet breakdown).
 //  A  "as paperclips fill the room": the spark's line bends into one Gem clip (top-down, engraved),
 //     which cools into steel and replicates on 8th notes (1 → 64), then the lattice floods the plane.
@@ -355,17 +357,17 @@ export default class Paperclips extends Scene {
     c.font = font(F.mono(500), 13);
     c.letterSpacing = '3px';
     c.fillStyle = rgba('ash', 0.9);
-    c.fillText('↩  AUTOMATIC REPLY', pad, 40);
+    c.fillText(tr('↩  AUTOMATIC REPLY'), pad, 40);
     c.textAlign = 'right';
     c.fillStyle = rgba('graphite', 1);
-    c.fillText('DO NOT REPLY', cw - pad, 40);
+    c.fillText(tr('DO NOT REPLY'), cw - pad, 40);
     c.textAlign = 'left';
     c.letterSpacing = '0px';
     c.font = font(F.mono(400), 15);
     c.fillStyle = rgba('graphite', 1);
-    c.fillText('Subject', pad, 80);
+    c.fillText(RUSSIAN ? 'Тема' : 'Subject', pad, 80);
     // the lyric, typed as sung
-    const size = 40;
+    const size = Math.min(40, (cw - pad * 2 - 16) / Math.max(1, layout(plain(line.text), F.mono(500), 1).width));
     c.font = font(F.mono(500), size);
     // typed as sung: a word's first key lands on its first syllable. A typed subject line in mono
     // UI text: typewriter apostrophe (guy's), like the body's I'm
@@ -393,11 +395,11 @@ export default class Paperclips extends Scene {
     c.fillRect(pad, 156, cw - pad * 2, 1);
     c.font = font(F.mono(400), 19);
     c.fillStyle = rgba('bone', 0.74);
-    const body = ["I'm out of office with limited access to", 'the killswitch. For urgent matters,', 'please contact —'];
+    const body = [tr("I'm out of office with limited access to"), tr('the killswitch. For urgent matters,'), tr('please contact —')];
     body.forEach((s, i) => c.fillText(s, pad, 194 + i * 29));
     c.font = font(F.mono(400), 13);
     c.fillStyle = rgba('graphite', 1);
-    c.fillText('Returning: TBD', pad, ch - 44);
+    c.fillText(tr('Returning: TBD'), pad, ch - 44);
     c.fillText(`Current P(doom): ${formatPDoom(this.pdoom.value(t))} (this message was sent automatically)`, pad, ch - 22);
     c.restore();
   }

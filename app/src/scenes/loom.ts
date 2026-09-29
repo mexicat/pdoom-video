@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 13 — "Loom (branching)" (final chorus, the loudest part of the song).
 //  1 "Just as foretold by Loom": one shot of the Loom tree. Hook 4's thread and spark become the root:
 //    the line is generated token by token along the chosen path (the spark writes each word as it is
@@ -32,14 +33,14 @@ const TAG = { x: 70, y: 62, w: 560, h: 46 };
 const TERM_LEVEL = 5;
 
 const CORPUS = [
-  'the mitochondria is the powerhouse of the cell', 'click here to subscribe', 'posted by anonymous at 3:14 am',
-  'terms of service apply', 'how to boil an egg (easy!)', 'in 1998 the committee decided', 'page not found',
-  'the quick brown fox jumps over the lazy dog', 'reply all', 'lol same', 'add to cart', 'chapter one', 'see also:',
-  'this article is a stub', 'you can help by expanding it', 'thanks in advance', 'edit: typo', 'citation needed',
-  'first post', 'the results are shown in table 2', 'we thank the anonymous reviewers', 'unsubscribe',
-  'all rights reserved', 'as shown above', 'it was a dark and stormy night', 'preheat the oven to 180',
-  'lorem ipsum dolor sit amet', 'the answer is 42', 'do not reply to this email', 'returns: None',
-  'import numpy as np', 'the end', 'is this a bug?', 'works on my machine', 'accept all cookies',
+  tr('the mitochondria is the powerhouse of the cell'), tr('click here to subscribe'), tr('posted by anonymous at 3:14 am'),
+  tr('terms of service apply'), tr('how to boil an egg (easy!)'), tr('in 1998 the committee decided'), tr('page not found'),
+  tr('the quick brown fox jumps over the lazy dog'), tr('reply all'), tr('lol same'), tr('add to cart'), tr('chapter one'), tr('see also:'),
+  tr('this article is a stub'), tr('you can help by expanding it'), tr('thanks in advance'), tr('edit: typo'), tr('citation needed'),
+  tr('first post'), tr('the results are shown in table 2'), tr('we thank the anonymous reviewers'), 'unsubscribe',
+  tr('all rights reserved'), tr('as shown above'), tr('it was a dark and stormy night'), tr('preheat the oven to 180'),
+  'lorem ipsum dolor sit amet', tr('the answer is 42'), tr('do not reply to this email'), 'returns: None',
+  'import numpy as np', tr('the end'), tr('is this a bug?'), tr('works on my machine'), tr('accept all cookies'),
 ];
 
 export default class Loom extends Scene {
@@ -64,7 +65,7 @@ export default class Loom extends Scene {
   room!: IlyaRoom;
   roomRT = makeRT(W, H, { depthBuffer: false });
   T!: { start: number; end: number; s2: number; s3: number; twist: number; untwist: number; beats: number[]; b1: number; b2: number; b3: number };
-  context = '…I’m upping my P(doom)'; // the lyric it continues (display punctuation, like the ellipsis)
+  context = tr('…I’m upping my P(doom)'); // the lyric it continues (display punctuation, like the ellipsis)
 
   override init() {
     const { lyrics: ly, audio: au, start, end } = this.ctx;

@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 6 — "Ascent (log scale)". Chorus 2 after the hook, four quick movements:
 //  A. "I hear the basilisk boom": an engraved serpent eye snaps open (shockwave, shake).
 //  B. "NVDA to the moon": the slit pupil match-cuts to a candle; the price (the spark) goes
@@ -22,7 +23,7 @@ type Mv = 'A' | 'B' | 'C' | 'D';
 
 function wordOf(l: Line, s: string): Word {
   const q = norm(s);
-  return l.words.find((w) => norm(w.w).includes(q)) ?? l.words[0]!;
+  return l.words.find((w) => norm(w.source ?? w.w).includes(q)) ?? l.words[0]!;
 }
 
 export default class Ascent extends Scene {
@@ -106,7 +107,7 @@ export default class Ascent extends Scene {
     const T = this.T, s0 = this.ctx.start;
     const tb = T.boom;
     // the camera steps in on each sung word (and leans, alternating), then slams on "boom"
-    const ws = T.l1.words.filter((w) => norm(w.w) !== 'boom');
+    const ws = T.l1.words.filter((w) => norm(w.source ?? w.w) !== 'boom');
     let zoom = 0.68 * (1 + 0.015 * prog(t, s0, tb));
     const leans = [-0.07, -0.03, -0.055, -0.015, 0.02];
     let rot = leans[0]!;
@@ -169,7 +170,7 @@ export default class Ascent extends Scene {
     // ---- lyric: "I HEAR THE BASILISK" set on the eyelid seam, split open by "boom"
     const L = this.L1; L.clear(); const c = L.ctx;
     const line = T.l1;
-    const words = line.words.filter((w) => norm(w.w) !== 'boom');
+    const words = line.words.filter((w) => norm(w.source ?? w.w) !== 'boom');
     const fam = F.archivo(125, 700), size = Math.round(54 * Math.min(1, cam.zoom / 0.95)), track = 16;
     const txt = words.map((w) => w.w.toUpperCase()).join(' ');
     const lay = layout(txt, fam, size, track);
@@ -228,7 +229,7 @@ export default class Ascent extends Scene {
         const Rpx = (0.68 + 0.07 * prog(e, 0, 0.5, ease.outCubic) + (i === 0 ? 0 : e * 1.2)) * cam.zoom * (H / 2);
         const a = (i === 0 ? 1 - prog(e, 0.35, 0.55) : Math.exp(-e / 0.25) * 0.7) * prog(e, 0, 0.03);
         const sz = 96 * (1 + e * 0.15) * (i === 0 ? 1 + 0.25 * pulse(e, 0, 0.06) : 1);
-        this.textOnArc(c, 'BOOM', ctr.x, ctr.y, Rpx, true, bf, sz, i === 0 ? rgba('bone', a) : rgba('signal', a), i === 0);
+        this.textOnArc(c, tr('BOOM'), ctr.x, ctr.y, Rpx, true, bf, sz, i === 0 ? rgba('bone', a) : rgba('signal', a), i === 0);
       }
     }
     comp.draw(renderer, L.upload(), out);
@@ -426,10 +427,10 @@ export default class Ascent extends Scene {
         c.font = font(F.mono(400, true), 20 * z); c.fillStyle = rgba('graphite', 0.9 * gridFade(y)); c.fillText(s, p.x, p.y);
         c.font = font(F.mono(500), lsz);
       };
-      note(12, '← still log scale');
-      note(19, '← yes, still log scale');
-      note(24, '← analysts: “fair value”');
-      note(27, '← we checked the axis');
+      note(12, tr('← still log scale'));
+      note(19, tr('← yes, still log scale'));
+      note(24, tr('← analysts: “fair value”'));
+      note(27, tr('← we checked the axis'));
       const tt = S(-1640, 6.4 * DEC);
       c.font = font(F.mono(600), 26 * z); c.fillStyle = rgba('ink', 0.85);
       c.fillText('NVDA · 1D · LOG', tt.x, tt.y);
@@ -441,11 +442,11 @@ export default class Ascent extends Scene {
       const mc = S(MOON.x, MOON.y);
       c.save();
       c.fillStyle = rgba('ink', 0.92);
-      this.arcText(c, 'LUNAR RESERVE NOTE', mc.x, mc.y, (MOON.r * 1.8) * z, F.serif(600), 34 * z, 0.2);
+      this.arcText(c, tr('LUNAR RESERVE NOTE'), mc.x, mc.y, (MOON.r * 1.8) * z, F.serif(600), 34 * z, 0.2);
       c.font = font(F.serif(400, true), 20 * z);
       c.textAlign = 'center';
       const mp = S(MOON.x, MOON.y - MOON.r * 1.9);
-      c.fillText('In Scaling We Trust', mp.x, mp.y);
+      c.fillText(tr('In Scaling We Trust'), mp.x, mp.y);
       // corner numerals and serials
       const cn = (x: number, y: number, al: CanvasTextAlign) => {
         const p = S(x, y);
@@ -786,7 +787,7 @@ export default class Ascent extends Scene {
     }
     // notation: 1 E 30 FLOP /s  (one token per sung word)
     const l4 = T.l4;
-    const tok: [string, string][] = [['1', 'one'], ['E', 'E'], ['30', 'thirty'], ['FLOP', 'flops'], ['/s', 'a second']];
+    const tok: [string, string][] = [['1', 'one'], ['E', 'E'], ['30', 'thirty'], ['FLOP', 'flops'], ['/s', tr('a second')]];
     const wds = l4.words;
     const tokWords: Word[][] = [[wds[0]!], [wds[1]!], [wds[2]!], [wds[3]!], wds.slice(4)];
     const nf = F.archivo(100, 900), ns = 150;
@@ -829,7 +830,7 @@ export default class Ascent extends Scene {
     // footnote marker + footnote typed after the lock
     if (t > tL) {
       c.font = font(nf, 60); c.fillStyle = rgba('signal', 1); c.fillText('¹', x - 8, yN - 80);
-      const fn = '¹ One nonillion floating-point operations per second. Rounded down, for safety.';
+      const fn = tr('¹ One nonillion floating-point operations per second. Rounded down, for safety.');
       const n = Math.floor(fn.length * prog(t, tL + 0.3, tL + 1.05));
       c.font = font(F.mono(400), 20);
       c.fillStyle = rgba('ash', 0.95);

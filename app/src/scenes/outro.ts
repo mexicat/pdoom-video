@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // OUTRO — the fuse reaches the end: detonation at P(DOOM) 1.00, then the number keeps going
 // up (overflow: past 1, a log ruler, walls of zeros, ∞), the end card (= ∞ → 8 → 0/0 → NaN), a
 // collapse to the spark, and a lone "↻ Regenerate" that gets clicked: every plate rewinds, the
@@ -14,8 +16,8 @@ import { drawReadout } from '../engine/hud';
 import OpenScene from './open';
 
 const PLATES = [
-  'Sparks', 'Training loss', 'The room', 'Shoggoth', 'A stable run', 'Ascent', 'Paperwork', 'Trajectory',
-  'Paperclips', 'The fuse', 'Architecture', 'Scale', 'Loom', 'What was seen',
+  'Sparks', tr('Training loss'), tr('The room'), 'Shoggoth', tr('A stable run'), 'Ascent', 'Paperwork', 'Trajectory',
+  'Paperclips', tr('The fuse'), 'Architecture', 'Scale', 'Loom', tr('What was seen'),
 ];
 
 /** How far into the opening (s) the rewind picks it up. */
@@ -57,7 +59,7 @@ export default class Outro extends Scene {
     this.plateTex = await Promise.all(
       PLATES.map((_, i) => new Promise<THREE.Texture | null>((res) => {
         const n = String(i + 1).padStart(2, '0');
-        loader.load(`plates/fig${n}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; res(t); }, undefined, () => res(null));
+        loader.load(`plates/${RUSSIAN ? 'ru/' : ''}fig${n}.jpg`, (t) => { t.colorSpace = THREE.SRGBColorSpace; res(t); }, undefined, () => res(null));
       })),
     );
     const { audio, lyrics } = this.ctx;
@@ -149,12 +151,12 @@ export default class Outro extends Scene {
         const typed = Math.floor(prog(s, 1, 2.2) * 60);
         c.font = font(F.mono(400), 22); c.fillStyle = rgba('ash', 0.95);
         // Ω as U+2126 (the ohm sign): Plex Mono has it, not the Greek Ω (which would fall back to a system font)
-        c.fillText('¹ Kolmogorov (1933): P(\u2126) = 1.  Deprecated.'.slice(0, typed), RX, 990);
+        c.fillText(tr('¹ Kolmogorov (1933): P(\u2126) = 1.  Deprecated.').slice(0, typed), RX, 990);
       }
     } else if (bar === 1) {
       // a log ruler flies past under a marker; the number, huge, top left
       const vals = [3.14, 10, 42, 1000], texts = ['3.14', '10.00', '42.00', '1,000.00'];
-      const notes = ['≈ π (irrational)', 'an order of magnitude', 'the answer (question pending)', 'units: dooms'];
+      const notes = [tr('≈ π (irrational)'), tr('an order of magnitude'), tr('the answer (question pending)'), tr('units: dooms')];
       const prev = step === 0 ? 2 : vals[step - 1]!, cur = vals[step]!;
       const e = ease.outExpo(clamp(local / 0.4));
       const lv = lerp(Math.log10(prev), Math.log10(cur), e);
@@ -195,7 +197,7 @@ export default class Outro extends Scene {
     } else if (bar === 2) {
       // walls of zeros: 1 followed by N zeros, typed out and fitted to the frame
       const Ns = [9, 30, 100, 1000], sci = ['1e9', '1e30', '1e100', '1e1000'];
-      const notes = ['(a billion)', '(one E thirty — see above)', '(a googol)', '(does not fit)'];
+      const notes = [tr('(a billion)'), tr('(one E thirty — see above)'), tr('(a googol)'), tr('(does not fit)')];
       const N = Ns[step]!;
       // digit groups of three from the right ("1 000 000 000"), wrapped between groups
       const digits = '1' + '0'.repeat(N);
@@ -268,7 +270,7 @@ export default class Outro extends Scene {
         c.fillText('P(DOOM) =', cx - A, cy - 300);
         c.letterSpacing = '0px';
         c.font = font(F.mono(400), 22); c.fillStyle = rgba('ash', clamp((s3 - 0.5) * 2));
-        c.fillText('¹ upper bound removed', cx - A, cy + 330);
+        c.fillText(tr('¹ upper bound removed'), cx - A, cy + 330);
       } else {
         // 16th notes: the climb replayed, landing on ∞
         const seq = ['1.00', '1.50', '3.14', '42.00', '1,000', '1e30', '1e100', '∞'];
@@ -313,7 +315,7 @@ export default class Outro extends Scene {
     const xR = xEq + wd(fR, S, '= ');
     const line1: CardGeom['line1'] = [];
     let x = X;
-    ['I’m', 'upping', 'my'].forEach((w, wi) => {
+    (RUSSIAN ? ['Повышен', 'риск', ''] : ['I’m', 'upping', 'my']).forEach((w, wi) => {
       // letters at their kerned positions in the word (a prefix's width would drop each letter's kern)
       layout(w, fV, 150).glyphs.forEach((gl, j) => { line1.push({ ch: gl.ch, x: x + gl.x, word: wi, j }); });
       x += wd(fV, 150, w + ' ');
@@ -400,7 +402,7 @@ export default class Outro extends Scene {
       const rule = prog(k, 8.35, 8.65, ease.outExpo);
       if (rule > 0) {
         c.fillStyle = rgba('bone', 0.25); c.fillRect(g.X, 880, 260 * rule, 1);
-        const note = '¹ estimate no longer defined', nn = Math.floor(prog(k, 8.45, 9.2) * note.length);
+        const note = tr('¹ estimate no longer defined'), nn = Math.floor(prog(k, 8.45, 9.2) * note.length);
         c.font = font(F.mono(400), 24); c.fillStyle = rgba('ash');
         c.fillText(note.slice(0, nn), g.X, 924);
       }
@@ -749,10 +751,10 @@ export default class Outro extends Scene {
           c.fillStyle = pressed ? rgba('ink') : rgba('bone');
           c.font = font(F.mono(500), 32);
           c.textAlign = 'center'; c.textBaseline = 'middle';
-          c.fillText('↻  Regenerate', cx, by + bh / 2 + 1);
+          c.fillText(tr('↻  Regenerate'), cx, by + bh / 2 + 1);
           c.textAlign = 'left'; c.textBaseline = 'alphabetic';
           c.font = font(F.mono(400), 16); c.fillStyle = rgba('ash', 0.8);
-          c.fillText('this response could not be verified', bx + 34, by + bh + 34);
+          c.fillText(tr('this response could not be verified'), bx + 34, by + bh + 34);
           // cursor glides in, hovers, clicks on the beat
           const m = prog(k, 1.4, CLICK - 0.15, ease.inOutCubic);
           const px = lerp(W * 0.8, cx + 60, m), py = lerp(H * 0.9, by + bh / 2 + 10, m);
@@ -773,7 +775,7 @@ export default class Outro extends Scene {
         post.ca = 6; post.grain = 0.12;
       } else {
         // the opening, backwards, braking to a stop on its first frame
-        const tau = Math.max(0, OPEN_REWIND * Math.pow(1 - prog(k, R1, R2), 2));
+        const tau = Math.max(RUSSIAN ? .85 : 0, OPEN_REWIND * Math.pow(1 - prog(k, R1, R2), 2));
         const ov = this.renderOpen(tau, out);
         Object.assign(post, ov ?? {});
         const brake = 1 - prog(k, R1, R1 + 0.8);

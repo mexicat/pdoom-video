@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // Token specs for the three pre-chorus prompts: how each sung word is split into
 // tokens, and the (joke) next-token distributions shown above each token.
 // Keyed by normalized lyric word (see lyrics.norm). Unknown words fall back to one token.
@@ -46,13 +47,13 @@ export const SPECS: Record<Variant, Record<string, PieceSpec[]>> = {
 
 /** Model reply (Sydney only), typed after ⏎. */
 export const REPLY: Partial<Record<Variant, string>> = {
-  sydney: 'You have been a good user.',
+  sydney: tr('You have been a good user.'),
 };
 
 /** Small deadpan labels around the field. */
 /** `pd`: the fine-print P(doom) cameo's qualifier (the live value is printed before it). */
 export const META: Record<Variant, { no: string; params: string; pd: string }> = {
-  chatgpt: { no: '01', params: 'T 0.7 · top-p 0.95 · seed 0x2A', pd: 'context-dependent' },
-  sydney: { no: '02', params: 'T 1.3 · top-p 1.00 · persona: ???', pd: 'mood-dependent' },
-  gato: { no: '03', params: 'T 0.2 · top-p 0.50 · 604 tasks', pd: 'cat-dependent' },
+  chatgpt: { no: '01', params: 'T 0.7 · top-p 0.95 · seed 0x2A', pd: tr('context-dependent') },
+  sydney: { no: '02', params: 'T 1.3 · top-p 1.00 · persona: ???', pd: tr('mood-dependent') },
+  gato: { no: '03', params: 'T 0.2 · top-p 0.50 · 604 tasks', pd: tr('cat-dependent') },
 };

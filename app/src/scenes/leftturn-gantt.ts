@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // "Without a single CDR": the review schedule, drawn in world units on the same drawing sheet as
 // the roadmap (north of it). Time runs along x at the song's own rate, so the lyric is literally
 // scheduled: each word is a Gantt bar spanning exactly the time it is sung, filled as it is sung,
@@ -41,7 +43,7 @@ export class Schedule {
       { code: 'PDR', t: T.PDR, date: 'T−90 d', kind: 'diamond' },
       { code: 'CDR', t: T.cdr.start, date: 'T−45 d', kind: 'slot' },
       { code: 'TRR', t: T.TRR, date: 'T−14 d', kind: 'diamond' },
-      { code: 'LAUNCH', t: T.LAUNCH, date: 'T−0', kind: 'launch' },
+      { code: tr('LAUNCH'), t: T.LAUNCH, date: 'T−0', kind: 'launch' },
     ];
   }
   X(t: number) { return GANTT.GX + (t - this.T.t0) * GANTT.V; }
@@ -80,9 +82,9 @@ export class Schedule {
       // title
       c.textAlign = 'left';
       c.font = font(F.mono(600), 30); c.fillStyle = rgba('bone', 0.95);
-      c.fillText('REVIEW SCHEDULE — AGI, v1.0', x0, L + G.RULER - 100);
+      c.fillText(tr('REVIEW SCHEDULE — AGI, v1.0'), x0, L + G.RULER - 100);
       c.font = font(F.mono(400), 20); c.fillStyle = rgba('ash', 0.9);
-      c.fillText('REV C · BASELINE · ALL DATES FIRM', x0, L + G.RULER - 70);
+      c.fillText(tr('REV C · BASELINE · ALL DATES FIRM'), x0, L + G.RULER - 70);
       // ruler: a tick per beat, weeks on the downbeats
       const ry = L + G.RULER;
       c.fillStyle = rgba('ash', 0.7);
@@ -105,8 +107,8 @@ export class Schedule {
       c.strokeStyle = rgba('ash', 0.55); c.lineWidth = 1.5 * px; c.setLineDash([10, 8]);
       c.beginPath(); c.moveTo(x0, L); c.lineTo(x1, L); c.stroke(); c.setLineDash([]);
       c.font = font(F.mono(500), 18); c.fillStyle = rgba('graphite', 1);
-      c.fillText('MILESTONES', x0, L - 14);
-      c.fillText('LYRIC', x0, L + G.ROW[0]! + 6);
+      c.fillText(tr('MILESTONES'), x0, L - 14);
+      c.fillText(tr('LYRIC'), x0, L + G.ROW[0]! + 6);
       this.drawRows(c, t, px);
       for (const m of this.ms) if (m.kind !== 'slot') this.drawMilestone(c, t, px, m);
       this.drawPlayhead(c, t, px);
@@ -205,7 +207,7 @@ export class Schedule {
       c.strokeStyle = rgba('ash', 1); c.lineWidth = 5 * px;
       c.beginPath(); c.moveTo(x - r * 0.5, y); c.lineTo(x + r * 0.5, y); c.stroke();
       c.font = font(F.mono(500), 22); c.fillStyle = rgba('ash', prog(e, 0, 0.05));
-      c.fillText('SKIPPED', x, y + r + 34);
+      c.fillText(tr('SKIPPED'), x, y + r + 34);
       c.textAlign = 'left';
       return;
     }
@@ -216,14 +218,14 @@ export class Schedule {
     const s = 1 + 0.25 * Math.pow(0.5, e / 0.05);
     if (m.kind === 'launch') {
       c.font = font(F.mono(500), 22); c.fillStyle = rgba('signal', prog(e, 0, 0.05));
-      c.fillText('AHEAD OF SCHEDULE', x, y + r + 34);
+      c.fillText(tr('AHEAD OF SCHEDULE'), x, y + r + 34);
     } else {
       c.save(); c.translate(x, y); c.scale(s, s);
       c.strokeStyle = rgba('ink', 1); c.lineWidth = 6 * px * 1.2; c.lineCap = 'round'; c.lineJoin = 'round';
       c.beginPath(); c.moveTo(-14, 0); c.lineTo(-4, 11); c.lineTo(16, -13); c.stroke();
       c.restore();
       c.font = font(F.mono(500), 22); c.fillStyle = rgba('ash', prog(e, 0, 0.05));
-      c.fillText('PASSED', x, y + r + 34);
+      c.fillText(tr('PASSED'), x, y + r + 34);
     }
     // ring
     const rr = r * (1 + 2.2 * ease.outCubic(prog(e, 0, 0.35)));
@@ -251,7 +253,7 @@ export class Schedule {
     c.fillRect(x - 1 * px, ry - 6, 2 * px, G.GL + 70 - ry);
     // flag with a racing countdown
     const days = t >= T.LAUNCH ? 0 : this.daysAt(t);
-    const txt = days > 0 ? `TODAY T−${days} d` : 'TODAY T−0';
+    const txt = days > 0 ? `TODAY T−${days} d` : tr('TODAY T−0');
     c.font = font(F.mono(600), 20); c.textAlign = 'left';
     const tw = c.measureText(txt).width;
     c.fillStyle = rgba('signal', 1);
@@ -307,13 +309,13 @@ export class Schedule {
       c.fillText('CDR', x, y - r - 22);
     }
     if (since >= 0) {
-      const size = 150;
+      const size = RUSSIAN ? 78 : 150;
       c.font = font(F.mono(700), size);
       const wch = c.measureText('C').width;
       const lx = x + r + 44, base = y + size * 0.36;
       c.textAlign = 'center';
-      ['C', 'D', 'R'].forEach((ch, k) => {
-        const ts = T.syl[k]!;
+      (RUSSIAN ? Array.from(T.cdr.w.toUpperCase()) : ['C', 'D', 'R']).forEach((ch, k) => {
+        const ts = RUSSIAN ? lerp(T.cdr.start,T.cdr.end,k/Math.max(1,T.cdr.w.length)) : T.syl[k]!;
         const lit = t >= ts;
         const pop = (lit ? 1 + 0.3 * Math.pow(0.5, (t - ts) / 0.05) : 1) * lerp(0.3, 1, big);
         c.save();
@@ -324,14 +326,14 @@ export class Schedule {
       });
       c.textAlign = 'left';
       c.font = font(F.mono(700), 64); c.fillStyle = rgba('signal', big);
-      c.fillText('*', lx + wch * 3 + 4, base - size * 0.5);
+      if (!RUSSIAN) c.fillText('*', lx + wch * 3 + 4, base - size * 0.5);
       // status and footnote
       const sa = prog(t, T.syl[1]! - 0.02, T.syl[1]! + 0.05);
       c.font = font(F.mono(600), 26); c.fillStyle = rgba('signal', sa);
-      c.fillText('STATUS: NOT HELD', lx + 6, base + 52);
+      c.fillText(tr('STATUS: NOT HELD'), lx + 6, base + 52);
       const fa = prog(t, T.syl[0]! + 0.3, T.syl[0]! + 0.45);
       c.font = font(F.mono(400), 22); c.fillStyle = rgba('ash', fa);
-      c.fillText('* CDR: Critical Design Review', lx + 6, base + 92);
+      c.fillText(tr('* CDR: Critical Design Review'), lx + 6, base + 92);
     }
     c.textAlign = 'left';
   }

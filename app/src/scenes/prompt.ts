@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // PROMPT x3 — the pre-choruses. A thin prompt field in a vast dark field; the plea is
 // typed as tokens exactly on the sung word starts, each with a tiny next-token
 // distribution flickering above it; ⏎ launches the chorus.
@@ -61,7 +63,7 @@ export default class Prompt extends Scene {
     // the plea: the line that starts inside our window
     const cands = lyrics.linesIn(start, end).filter((l) => l.start >= start - 0.25 && l.start < end - 0.5);
     this.line = cands[0] ?? lyrics.linesIn(start, end)[0]!;
-    const words = this.line.words;
+    const words = this.line.words.filter(w => w.w.trim());
     // typed input: typewriter quotes (lyric words come with ’; a keyboard types ')
     const typed = words.map((w) => plain(w.w));
     this.text = typed.join(' ');
@@ -73,8 +75,11 @@ export default class Prompt extends Scene {
     words.forEach((w, wi) => {
       if (wi > 0) ci += 1; // the space
       const ww = typed[wi]!;
-      let pieces = specs[norm(w.w)];
-      if (!pieces || pieces.map((p) => p.s).join('') !== ww) pieces = [{ s: ww, dist: [[ww, 0.5], ['…', 0.12]] }];
+      let pieces = specs[norm(w.source ?? w.w)];
+      if (!pieces || pieces.map((p) => p.s).join('') !== ww) {
+        const alternatives = RUSSIAN ? (pieces?.flatMap(p=>p.dist ?? []).slice(1,4).map(([s,p])=>[tr(s),p] as [string,number]) ?? [['sudo',.07],['…',.03]] as [string,number][]) : [['…',.12]] as [string,number][];
+        pieces = [{s:ww,dist:[[ww,.5],...alternatives]}];
+      }
       const syl = w.syl && w.syl.length === pieces.length ? w.syl : null;
       let off = 0;
       pieces.forEach((p, pi) => {
@@ -258,7 +263,7 @@ export default class Prompt extends Scene {
       const lt = t - this.ctx.start, dur = this.tEnd - this.ctx.start;
       const rushK = clamp((t - this.tEnter) / (this.tEnd - this.tEnter));
       u.camZ!.value = lt * 0.42 + 2.2 * Math.pow(lt / dur, 2.4) + 16 * Math.pow(rushK, 2.2);
-      const eat = this.line.words.find((w) => norm(w.w) === 'eat');
+      const eat = this.line.words.find((w) => norm(w.source ?? w.w) === 'eat');
       u.swallow!.value = eat ? clamp((t - eat.start) / 0.9, 0, 2) : 2;
       u.glow!.value = 0.25 + 0.5 * Math.pow(lt / dur, 2) + 6 * Math.pow(rushK, 3) + 0.25 * beatPulse;
       u.rush!.value = rushK;
@@ -358,8 +363,8 @@ export default class Prompt extends Scene {
     c.font = font(F.mono(500), 13);
     c.letterSpacing = '3px';
     c.fillStyle = rgba('bone', 0.6);
-    c.fillText('PROMPT', fx0, fy1 + 30);
-    const pw = measure('PROMPT', F.mono(500), 13, 3) + 14;
+    c.fillText(tr('PROMPT'), fx0, fy1 + 30);
+    const pw = measure(tr('PROMPT'), F.mono(500), 13, 3) + 14;
     c.fillStyle = rgba('signal', 0.9);
     c.fillText(META[v].no, fx0 + pw, fy1 + 30);
     c.letterSpacing = '0px';
@@ -383,7 +388,7 @@ export default class Prompt extends Scene {
     c.letterSpacing = '0px';
     c.font = font(F.mono(400), 13);
     c.fillStyle = rgba('ash', 0.75);
-    const sendTxt = ' send  (irreversible)';
+    const sendTxt = tr(' send  (irreversible)');
     c.fillText(sendTxt, fx1, fy1 + 52);
     c.textAlign = 'left';
     // ⏎ (not in Plex Mono): the keycap's return arrow, drawn small in the cell before "send"
@@ -543,7 +548,7 @@ export default class Prompt extends Scene {
       c.textBaseline = 'alphabetic';
       c.font = font(F.mono(400), 11);
       c.fillStyle = rgba('ash', 0.85);
-      c.fillText('p( next | context )', 10, -hgt + 14);
+      c.fillText(tr('p( next | context )'), 10, -hgt + 14);
       c.textAlign = 'right';
       c.fillText(picked ? 'sampled' : 'computing…', pw - 8, -hgt + 14);
       c.textAlign = 'left';
@@ -623,7 +628,7 @@ export default class Prompt extends Scene {
     c.font = font(F.mono(500), 13);
     c.letterSpacing = '3px';
     c.fillStyle = rgba('signal', 0.9);
-    c.fillText('REPLY', rx - 96 + 8, ry);
+    c.fillText(tr('REPLY'), rx - 96 + 8, ry);
     c.letterSpacing = '0px';
     c.font = font(F.mono(400), 30);
     if (t < tStream) {

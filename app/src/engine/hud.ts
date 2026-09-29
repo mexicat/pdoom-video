@@ -5,6 +5,7 @@ import { Layer2D, W, H } from './gl';
 import { rgba } from './palette';
 import { F, font } from './type';
 import type { Lyrics } from './lyrics';
+import { RUSSIAN } from '../edition';
 import { clamp, ease, hash, lerp, noise1, prog, smoothstep } from './util';
 
 export interface Caption { start: number; end: number; fig: string; text: string }
@@ -13,7 +14,7 @@ export interface Caption { start: number; end: number; fig: string; text: string
 export class PDoom {
   steps: { t: number; v: number }[] = [];
   constructor(lyrics: Lyrics) {
-    const hits = lyrics.findWords('P(doom)').map((w) => w.start + 0.06);
+    const hits = (RUSSIAN && lyrics.find('Повышен риск конца').length ? lyrics.find('Повышен риск конца').map(l => l.words[l.words.length - 1]!) : lyrics.findWords('P(doom)')).map((w) => w.start + 0.06);
     const vals = [0.15, 0.42, 0.81, 0.99];
     this.steps = [{ t: -1, v: 0.02 }, ...hits.map((t, i) => ({ t, v: vals[i] ?? 0.99 }))];
   }

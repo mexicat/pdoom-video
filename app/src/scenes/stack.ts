@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // FIG. 11 — "Architecture (recursive)". The bridge, part 1:
 //   “Just transformers all the way!” / Till you learned to disobey
 // An infinite vertical stack of transformer blocks drawn as technical line diagrams. The camera
@@ -130,7 +132,7 @@ export default class Stack extends Scene {
       this.groups.push(this.makeGroup(block, ws, stepTimeOf(block)));
     }
     // held word: the blocks between a long word and the next group echo it (ghost copies)
-    const tw = q.words.find((w) => /transformers/i.test(w.w));
+    const tw = q.words.find((w) => /transformers/i.test(w.source ?? w.w));
     if (tw) {
       const g = this.groups.find((g) => g.words.includes(tw))!;
       const next = this.groups.find((x) => x.block > g.block);
@@ -146,7 +148,7 @@ export default class Stack extends Scene {
     // tracked about as tight as before, the inks of E–Y kept a hairline apart
     {
       const fam = F.archivo(75, 900);
-      const text = this.disobey.w.replace(/[^A-Za-z]/g, '').toUpperCase();
+      const text = this.disobey.w.replace(/[^\p{L}]/gu, '').toUpperCase();
       const capH = 2.3, minGap = capH * 0.04;
       const lay = layout(text, fam, 100, -0.03 * 100);
       let shift = 0, right = -Infinity;
@@ -186,7 +188,7 @@ export default class Stack extends Scene {
     }
     for (const o of this.text3.children) ((o as THREE.Mesh).material as THREE.Material).depthTest = true;
     // phase cuts (camera setups change on these step times)
-    const gFirst = (re: RegExp) => this.groups.find((g) => g.words.some((w) => re.test(w.w)));
+    const gFirst = (re: RegExp) => this.groups.find((g) => g.words.some((w) => re.test(w.source ?? w.w)));
     const gAll = gFirst(/^all$/i), gTill = gFirst(/^till$/i);
     this.phaseCuts = [
       { t: t0, id: 'A' },
@@ -207,7 +209,7 @@ export default class Stack extends Scene {
       return tp;
     });
     // rows: greedy fill; widen the budget until there are at most 2 rows, then scale rows to fit
-    const gap = 0.55, maxW = 12.6, lead = capH * 1.12;
+    const gap = 0.55, maxW = RUSSIAN ? 10.2 : 12.6, lead = capH * 1.12;
     let rows: number[][] = [];
     for (const budget of [maxW, 15, 18, 22, 30]) {
       rows = [[]];
@@ -257,7 +259,7 @@ export default class Stack extends Scene {
     };
     const label = (text: string, cx: number, cy: number, capH: number, c: RGB, al = 1, alignLeft = false, w = 1.1) => {
       const sl = strokeLines(text, 'tech', 100);
-      const k = capH / Math.max(1e-3, sl.cap);
+      const k = Math.min(capH / Math.max(1e-3, sl.cap), (alignLeft ? HX * 2 - 1.1 : BX1 - BX0 - .35) / Math.max(.001, sl.width));
       const ox = alignLeft ? cx : cx - (sl.width * k) / 2;
       for (const st of sl.strokes) for (let i = 1; i < st.length; i++) {
         const p = st[i - 1]!, q = st[i]!;
@@ -293,10 +295,10 @@ export default class Stack extends Scene {
       }
       label(name, (BX0 + BX1) / 2, (y0 + y1) / 2, Math.min(0.26, (y1 - y0) * 0.36), C_ASH, 0.95);
     };
-    box(-2.15, -1.15, 'MULTI-HEAD ATTENTION', 3);
-    box(-0.8, -0.3, 'ADD & NORM');
-    box(0.25, 1.25, 'FEED FORWARD');
-    box(1.6, 2.1, 'ADD & NORM');
+    box(-2.15, -1.15, tr('MULTI-HEAD ATTENTION'), 3);
+    box(-0.8, -0.3, tr('ADD & NORM'));
+    box(0.25, 1.25, tr('FEED FORWARD'));
+    box(1.6, 2.1, tr('ADD & NORM'));
     // main path (hot)
     const hotW = 1.6;
     s([MX, -HY, z], [MX, -2.55, z], hotW, C_BONE, 0.8, Hh);
@@ -327,7 +329,7 @@ export default class Stack extends Scene {
     label('K', MX - 0.25, -2.42, 0.14, C_ASH, 0.9);
     label('V', MX + 1.8 - 0.25, -2.42, 0.14, C_ASH, 0.9);
     // title & specs
-    label('TRANSFORMER BLOCK', -HX + 0.55, HY - 0.55, 0.17, C_ASH, 0.9, true);
+    label(tr('TRANSFORMER BLOCK'), -HX + 0.55, HY - 0.55, 0.17, C_ASH, 0.9, true);
     label('D_MODEL 12288', 4.0, -1.0, 0.12, C_GRAPH, 1, true);
     label('HEADS 96', 4.0, -1.35, 0.12, C_GRAPH, 1, true);
     label('FFN 4×', 4.0, 0.75, 0.12, C_GRAPH, 1, true);
@@ -682,14 +684,14 @@ export default class Stack extends Scene {
     c.font = font(F.mono(500), 15);
     c.letterSpacing = '3px';
     c.fillStyle = rgba('bone', 0.55);
-    c.fillText('DEPTH', 110, 118);
+    c.fillText(tr('DEPTH'), 110, 118);
     c.font = font(F.mono(400), 30);
     c.letterSpacing = '0px';
     c.fillStyle = rgba('bone', 0.9);
     c.fillText(`L.${String(layer).padStart(3, '0')} / ${t >= this.stopT ? String(layer).padStart(3, '0') : '∞'}`, 108, 154);
     c.font = font(F.mono(400), 13);
     c.fillStyle = rgba('bone', 0.4);
-    c.fillText('N × transformer block, N → ∞', 110, 178);
+    c.fillText(tr('N × transformer block, N → ∞'), 110, 178);
     // P(doom) cameo under the depth gauge
     c.fillStyle = rgba('bone', 0.18); c.fillRect(110, 194, 236, 1);
     c.font = font(F.mono(500), 15); c.letterSpacing = '2px'; c.fillStyle = rgba('signal', 0.95);
@@ -715,7 +717,7 @@ export default class Stack extends Scene {
       c.fillText(` = ${deg.toFixed(1)}°`, a.x + 66 + 2 * c.measureText('0').width, a.y - 50);
       c.font = font(F.mono(400), 14);
       c.fillStyle = rgba('bone', 0.7);
-      c.fillText('MISALIGNED (1 of ∞)', a.x + 66, a.y - 18);
+      c.fillText(tr('MISALIGNED (1 of ∞)'), a.x + 66, a.y - 18);
       c.restore();
     }
   }

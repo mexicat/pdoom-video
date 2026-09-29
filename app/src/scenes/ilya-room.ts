@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 14's world as a function of song time: the timings (from the lyrics and the beat grid), the
 // camera path, the lid, the lights, and the screen's contents (withheld). Rendered by ilya.ts, and by
 // loom.ts as the bottom level of its Droste recursion (so the dive lands exactly on our first frame).
@@ -62,7 +63,7 @@ export class IlyaTimes {
     this.l1 = ly.get('What did Ilya');
     this.l2 = ly.get('all for show');
     const w1 = this.l1.words, w2 = this.l2.words;
-    const find = (ws: Word[], re: RegExp, i: number) => ws.find((w) => re.test(w.w)) ?? ws[i]!;
+    const find = (ws: Word[], re: RegExp, i: number) => ws.find((w) => re.test(w.source ?? w.w)) ?? ws[i]!;
     this.what = w1[0]!; this.see = find(w1, /see/i, 3); this.well = find(w1, /we[’']?ll/i, 4);
     this.never = find(w1, /never/i, 5); this.know = find(w1, /know/i, 6);
     this.was = w2[0]!; this.it = w2[1]!; this.all = find(w2, /^all/i, 2); this.forW = find(w2, /^for/i, 3); this.show = find(w2, /show/i, 4);
@@ -150,9 +151,9 @@ export class IlyaRoom {
       c.fillStyle = ink; c.letterSpacing = '2px';
       let fs = 86;
       c.font = font(F.archivo(100, 800), fs);
-      fs *= Math.min(1, 470 / c.measureText('FEEL THE AGI').width);
+      fs *= Math.min(1, 470 / c.measureText(tr('FEEL THE AGI')).width);
       c.font = font(F.archivo(100, 800), fs);
-      c.fillText('FEEL THE AGI', 0, 5);
+      c.fillText(tr('FEEL THE AGI'), 0, 5);
       c.letterSpacing = '0px';
       c.fillStyle = 'rgba(255,255,255,0.22)'; c.beginPath(); c.moveTo(270, -86); c.lineTo(222, -86); c.lineTo(270, -40); c.closePath(); c.fill();
     });
@@ -193,7 +194,7 @@ export class IlyaRoom {
       shadow(); c.beginPath(); c.ellipse(0, 0, 250, 108, 0, 0, TAU); c.fillStyle = bone; c.fill(); noShadow();
       c.lineWidth = 4; c.strokeStyle = ink; c.beginPath(); c.ellipse(0, 0, 232, 92, 0, 0, TAU); c.stroke();
       c.fillStyle = ink; c.font = font(F.mono(600), 44); c.letterSpacing = '4px';
-      c.fillText('SLIGHTLY', 0, -22); c.fillText('CONSCIOUS', 0, 30);
+      c.fillText(tr('SLIGHTLY'), 0, -22); c.fillText(tr('CONSCIOUS'), 0, 30);
       c.letterSpacing = '0px';
     });
     // Q*
@@ -208,7 +209,7 @@ export class IlyaRoom {
       shadow(); c.fillStyle = ink; c.fillRect(-330, -38, 660, 76); noShadow();
       c.strokeStyle = bone; c.lineWidth = 3; c.strokeRect(-322, -30, 644, 60);
       c.fillStyle = bone; c.font = font(F.serif(500, true), 40);
-      c.fillText('attention is all you need', 0, 3);
+      c.fillText(tr('attention is all you need'), 0, 3);
     });
   }
 
@@ -246,7 +247,7 @@ export class IlyaRoom {
       c.textBaseline = 'middle';
       c.textAlign = 'center';
       c.letterSpacing = '14px';
-      c.fillText('REDACTED', 7, 2);
+      c.fillText(tr('REDACTED'), 7, 2);
       c.restore();
     }
     this.screenTex.needsUpdate = true;

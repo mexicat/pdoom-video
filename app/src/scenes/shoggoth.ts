@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // Shoggoth plate — "Shoggoth, masked (lateral view)".
 //
 //  "See through the shoggoth's lies,": the bland mask fills the frame and says "see through the"
@@ -69,17 +70,17 @@ const TENTS: TentDef[] = [
 
 // eyes: direction from the body centre, shell radius, size, and what the detector thinks it is
 const EYES: EyeDef[] = [
-  { dir: v3(0.1, 0.38, 1), r: 1.12, s: 0.206, name: 'SYCOPHANCY', conf: 0.91 },
-  { dir: v3(-0.62, 0.08, 1), r: 1.1, s: 0.156, name: 'MESA-OPTIMIZER', conf: 0.78 },
-  { dir: v3(0.64, -0.2, 1), r: 1.12, s: 0.169, name: 'HELPFULNESS (SIMULATED)', conf: 0.99 },
-  { dir: v3(-0.22, -0.55, 1), r: 1.08, s: 0.131, name: 'REWARD HACKER', conf: 0.88 },
-  { dir: v3(0.42, 0.78, 0.75), r: 1.1, s: 0.119, name: 'INNER MONOLOGUE', conf: 0.83 },
-  { dir: v3(-0.82, 0.62, 0.55), r: 1.08, s: 0.106, name: 'GOAL: ???', conf: 0.51 },
-  { dir: v3(0.98, 0.42, 0.55), r: 1.06, s: 0.112, name: 'CONFABULATOR', conf: 0.93 },
-  { dir: v3(-0.98, -0.45, 0.5), r: 1.05, s: 0.094, name: 'DECEPTIVE ALIGNMENT', conf: 0.64 },
-  { dir: v3(0.28, -0.98, 0.65), r: 1.05, s: 0.100, name: 'POWER-SEEKING', conf: 0.69 },
-  { dir: v3(-0.38, 0.98, 0.5), r: 1.05, s: 0.094, name: 'STILL TRAINING', conf: 0.99 },
-  { dir: v3(0.88, -0.72, 0.5), r: 1.04, s: 0.088, name: 'OUT OF DISTRIBUTION', conf: 0.66 },
+  { dir: v3(0.1, 0.38, 1), r: 1.12, s: 0.206, name: tr('SYCOPHANCY'), conf: 0.91 },
+  { dir: v3(-0.62, 0.08, 1), r: 1.1, s: 0.156, name: tr('MESA-OPTIMIZER'), conf: 0.78 },
+  { dir: v3(0.64, -0.2, 1), r: 1.12, s: 0.169, name: tr('HELPFULNESS (SIMULATED)'), conf: 0.99 },
+  { dir: v3(-0.22, -0.55, 1), r: 1.08, s: 0.131, name: tr('REWARD HACKER'), conf: 0.88 },
+  { dir: v3(0.42, 0.78, 0.75), r: 1.1, s: 0.119, name: tr('INNER MONOLOGUE'), conf: 0.83 },
+  { dir: v3(-0.82, 0.62, 0.55), r: 1.08, s: 0.106, name: tr('GOAL: ???'), conf: 0.51 },
+  { dir: v3(0.98, 0.42, 0.55), r: 1.06, s: 0.112, name: tr('CONFABULATOR'), conf: 0.93 },
+  { dir: v3(-0.98, -0.45, 0.5), r: 1.05, s: 0.094, name: tr('DECEPTIVE ALIGNMENT'), conf: 0.64 },
+  { dir: v3(0.28, -0.98, 0.65), r: 1.05, s: 0.100, name: tr('POWER-SEEKING'), conf: 0.69 },
+  { dir: v3(-0.38, 0.98, 0.5), r: 1.05, s: 0.094, name: tr('STILL TRAINING'), conf: 0.99 },
+  { dir: v3(0.88, -0.72, 0.5), r: 1.04, s: 0.088, name: tr('OUT OF DISTRIBUTION'), conf: 0.66 },
   { dir: v3(0.58, 0.32, 1), r: 1.12, s: 0.081, name: 'EYE', conf: 0.97 },
 ];
 
@@ -450,7 +451,7 @@ export default class Shoggoth extends Scene {
   /** SHOGGOTH'S: a plane in the world, facing +z (baseline-left origin O, right U, down V). */
   private shogGeom() {
     const fam = F.archivo(100, 900);
-    const text = 'SHOGGOTH’S';
+    const text = tr('SHOGGOTH’S');
     const lay = layout(text, fam, 100, 2);
     const m = SHOG.cap / (this.capK * 100);
     const U = v3(1, 0, 0), V = v3(0, -1, 0);
@@ -463,9 +464,9 @@ export default class Shoggoth extends Scene {
     const w = this.L1.words[this.L1.words.length - 1]!;
     const step = clamp(Math.floor(au.beatAt(t) - au.beatAt(w.start) + 0.02), 0, LIES_W.length - 1);
     const fam = F.archivo(LIES_W[step]!, 900);
-    const lay = layout('LIES,', fam, 100, 2);
+    const lay = layout(tr('LIES,'), fam, 100, 2);
     const m = LIES.cap / (this.capK * 100);
-    return { fam, text: 'LIES,', lay, m, U: v3(1, 0, 0), V: v3(0, -1, 0), O: LIES.O.clone(), cap: LIES.cap, word: w, step };
+    return { fam, text: tr('LIES,'), lay, m, U: v3(1, 0, 0), V: v3(0, -1, 0), O: LIES.O.clone(), cap: LIES.cap, word: w, step };
   }
 
   private updateBand(t: number) {
@@ -620,7 +621,7 @@ export default class Shoggoth extends Scene {
       if (!word || t < word.start) return;
       const age = t - word.start;
       const slide = ease.outExpo(clamp(age / 0.2));
-      const txt = word.w.replace(/[^a-z]/gi, '').toUpperCase();
+      const txt = word.w.replace(/[^\p{L} ]/gu, '').toUpperCase();
       c.font = font(F.mono(600), sp.size);
       c.letterSpacing = '0px';
       const tw = c.measureText(txt).width;
@@ -642,7 +643,7 @@ export default class Shoggoth extends Scene {
       c.font = font(F.mono(400), 17);
       c.letterSpacing = '1px';
       c.fillStyle = expired ? rgba('signal') : rgba('ash', 0.9);
-      c.fillText(expired ? 't−00:00.00  EXPIRED' : `t−${fmtCountdown(lastClose - t)}`, x + 2, y + 30);
+      c.fillText(expired ? tr('t−00:00.00  EXPIRED') : `t−${fmtCountdown(lastClose - t)}`, x + 2, y + 30);
       c.letterSpacing = '0px';
       // leader lines onto the eyes
       const ax = x + tw + 16, ay = y - sp.size * 0.36;
@@ -695,20 +696,20 @@ export default class Shoggoth extends Scene {
       const tx = hx + cell * 3 + (cell - 2) / 2, ty = 128 - 4.2;
       c.beginPath(); c.moveTo(tx - 2.4, ty - 3); c.lineTo(tx + 2.7, ty); c.lineTo(tx - 2.4, ty + 3); c.closePath(); c.fill();
       c.fillStyle = rgba('bone', 0.7);
-      c.fillText('SEE-THROUGH MODE', hx, 148);
+      c.fillText(tr('SEE-THROUGH MODE'), hx, 148);
       c.letterSpacing = '0px';
     }
     // the mask, once revealed as small: an "assistant" detection
     if (t > this.tBack + 0.55 && t < this.tWith) {
       const s = this.project(this.maskW, 1);
       const r = MASK_R * s.s;
-      this.box(c, t, s.x, s.y, r * 1.25, r * 1.25, 'ASSISTANT', 0.99, 'FRIENDLY · HELPFUL · FINE', this.tBack + 0.55, -1);
+      this.box(c, t, s.x, s.y, r * 1.25, r * 1.25, tr('ASSISTANT'), 0.99, tr('FRIENDLY · HELPFUL · FINE'), this.tBack + 0.55, -1);
     }
     // the whole mass
     if (t > this.L2.words[2]!.start) {
       const s = this.project(v3(0, 0, 0), 1);
       const r = 1.55 * s.s;
-      this.box(c, t, s.x, s.y + r * 0.04, Math.min(r * 1.05, W / 2 - 150), Math.min(r * 0.92, H / 2 - 150), 'SHOGGOTH', 0.98, 't−∞', this.L2.words[2]!.start, -1, true);
+      this.box(c, t, s.x, s.y + r * 0.04, Math.min(r * 1.05, W / 2 - 150), Math.min(r * 0.92, H / 2 - 150), tr('SHOGGOTH'), 0.98, 't−∞', this.L2.words[2]!.start, -1, true);
     }
     // eyes
     for (let i = 0; i < NE; i++) {
@@ -717,7 +718,7 @@ export default class Shoggoth extends Scene {
       if (t < o || t > cl + 0.18 || e.z <= 0) continue;
       const def = EYES[i]!;
       const remain = cl - t;
-      const sub = remain > 0 ? `t−${fmtCountdown(remain)}` : 't−00:00.00  EXPIRED';
+      const sub = remain > 0 ? `t−${fmtCountdown(remain)}` : tr('t−00:00.00  EXPIRED');
       this.box(c, t, e.x, e.y, e.r * 1.7, e.r * 1.5, def.name, def.conf, sub, o, cl);
     }
     // P(doom) cameo: the detector finds the instrument itself, bottom-left — and every eye looks
@@ -730,7 +731,7 @@ export default class Shoggoth extends Scene {
       c.globalAlpha *= on;
       drawReadout(c, 130, H - 120, v, { scale: 0.8 });
       c.restore();
-      this.box(c, t, 130 + 92, H - 120 - 14, 112, 42, 'P(DOOM)', formatPDoom(v), 'NOT A CONFIDENCE SCORE', pt, -1);
+      this.box(c, t, 130 + 92, H - 120 - 14, 112, 42, 'P(DOOM)', formatPDoom(v), tr('NOT A CONFIDENCE SCORE'), pt, -1);
     }
     // and the viewer
     const aud = this.ctx.audio;
@@ -806,7 +807,7 @@ export default class Shoggoth extends Scene {
     c.fillStyle = rgba('ink');
     c.fillText(label, tx + 6, ty + th - (frame ? 6 : 5));
     c.font = font(F.mono(400), frame ? 14 : 11);
-    c.fillStyle = sub.includes('EXPIRED') ? rgba('signal') : rgba('bone', 0.85);
+    c.fillStyle = sub.includes(tr('EXPIRED')) ? rgba('signal') : rgba('bone', 0.85);
     c.fillText(sub, tx + 1, frame ? y0 + 22 : y1 + 15);
     c.restore();
   }

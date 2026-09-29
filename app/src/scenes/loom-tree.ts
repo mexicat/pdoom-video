@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 13a — the Loom tree: "Just as foretold by Loom" generated token by token along the chosen
 // path, while sibling branches (the continuations not taken) sprout at every node with their tokens
 // and probabilities, and keep branching into the dark. World px, y down; the root sits exactly on
@@ -16,10 +17,10 @@ export type P2 = { x: number; y: number };
 const ALTS: { label: string; p: number; off: number }[][] = [
   [{ label: 'Exactly', p: 0.19, off: -640 }, { label: 'Almost', p: 0.08, off: -712 }, { label: 'Not', p: 0.04, off: 600 }, { label: 'Only', p: 0.03, off: 672 }],
   [{ label: 'like', p: 0.14, off: -548 }, { label: 'so', p: 0.05, off: 520 }],
-  [{ label: 'predicted', p: 0.21, off: -412 }, { label: 'prophesied', p: 0.09, off: -474 }, { label: 'warned', p: 0.06, off: 376 }, { label: 'priced in', p: 0.04, off: 438 }],
+  [{ label: 'predicted', p: 0.21, off: -412 }, { label: 'prophesied', p: 0.09, off: -474 }, { label: 'warned', p: 0.06, off: 376 }, { label: tr('priced in'), p: 0.04, off: 438 }],
   [{ label: 'in', p: 0.18, off: -372 }, { label: 'on', p: 0.04, off: 290 }],
-  [{ label: 'Moloch', p: 0.22, off: -196 }, { label: 'the scaling laws', p: 0.17, off: -250 }, { label: 'Nostradamus', p: 0.09, off: -304 },
-    { label: 'nobody, technically', p: 0.08, off: 88 }, { label: 'a Substack post', p: 0.05, off: 142 }, { label: 'the eval suite', p: 0.03, off: 196 }],
+  [{ label: 'Moloch', p: 0.22, off: -196 }, { label: tr('the scaling laws'), p: 0.17, off: -250 }, { label: 'Nostradamus', p: 0.09, off: -304 },
+    { label: tr('nobody, technically'), p: 0.08, off: 88 }, { label: tr('a Substack post'), p: 0.05, off: 142 }, { label: tr('the eval suite'), p: 0.03, off: 196 }],
 ];
 /** Horizontal reach of each node's arcs (world px). */
 const REACH = [640, 540, 440, 330, 250];
@@ -252,7 +253,7 @@ export class LoomTree {
         c.shadowColor = rgba('signal', 0.7); c.shadowBlur = 40 * z;
         c.globalAlpha = loomK;
         c.fillStyle = rgba('signal');
-        c.fillText(w.w.replace(/[^A-Za-z]/g, ''), 0, 0);
+        c.fillText(w.w.replace(/[^\p{L}]/gu, ''), 0, 0);
         c.shadowBlur = 0;
         c.font = font(this.famMono, 17);
         c.letterSpacing = '3px';

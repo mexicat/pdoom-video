@@ -1,10 +1,11 @@
+import { tr } from '../ru/strings';
 // "SHROOMS" across the room → shoggoth cut: the word escapes the room's flip-board and ends the
 // room plate in a fixed screen layout; shoggoth's first frames continue exactly that layout while
 // the mask rushes in. Shared here so both plates agree on every letter.
 import { W, H } from '../engine/gl';
 import { F, layout } from '../engine/type';
 
-export const SHROOMS = 'SHROOMS';
+export const SHROOMS = tr('SHROOMS');
 export const SHROOMS_FAM = () => F.archivo(125, 900);
 /** Screen size (px) of the word at the cut. */
 export const SHROOMS_SIZE = 250;

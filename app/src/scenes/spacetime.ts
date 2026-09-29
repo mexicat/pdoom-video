@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // FIG. 5 `spacetime` — four movements of one idea (revision 2).
 //  I   "We had a stable training run,": the stable run as a pristine instrument. A triggered phosphor
 //      scope, the waveform almost still, the beam repainting it once per beat and writing the lyric on it.
@@ -37,7 +39,7 @@ const sineInOut = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * clamp(x));
 
 function findWord(line: Line, q: string): Word {
   const n = norm(q);
-  const w = line.words.find((x) => norm(x.w) === n);
+  const w = line.words.find((x) => norm(x.source ?? x.w) === n);
   if (!w) throw new Error(`word not found: ${q}`);
   return w;
 }
@@ -178,7 +180,7 @@ export default class SpacetimeScene extends Scene {
     {
       const mc = document.createElement('canvas').getContext('2d')!;
       mc.font = font(this.big, this.nowSize);
-      this.nowLay = layout('NOW', this.big, this.nowSize);
+      this.nowLay = layout((RUSSIAN ? "НО" : 'NOW'), this.big, this.nowSize);
       const o = this.nowLay.glyphs[1]!;
       const m = mc.measureText('O');
       const oCy = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2; // O centre above the baseline
@@ -402,11 +404,11 @@ export default class SpacetimeScene extends Scene {
     c.fillStyle = rgba('signal', 0.95 * a);
     c.fillText(formatPDoom(this.pd.value(t)), 96 + c.measureText('CH2  P(doom)  ').width, 160);
     c.fillStyle = rgba('ash', 0.7 * a);
-    c.fillText('(muted)', 96, 188);
+    c.fillText(tr('(muted)'), 96, 188);
     c.textAlign = 'right';
     c.fillStyle = rgba('bone', 0.75 * a);
     c.fillText(`M  ${(60000 / bpm / 4).toFixed(1)} ms/div`, W - 96, 92);
-    const trig = but > 0 ? (blink ? 'NO SIGNAL' : '') : "TRIG'D    CH1";
+    const trig = but > 0 ? (blink ? tr('NO SIGNAL') : '') : "TRIG'D    CH1";
     c.fillStyle = but > 0 ? rgba('signal', a) : rgba('ash', 0.8 * a);
     c.fillText(trig, W - 96, 120);
     if (but <= 0) {
@@ -491,7 +493,7 @@ export default class SpacetimeScene extends Scene {
       c.scale(slB, slB);
       c.font = font(this.big, this.butSize);
       c.fillStyle = heatCol(t - this.tBut, 0.96 * aB);
-      c.fillText('BUT', 0, 0);
+      c.fillText((RUSSIAN ? "" : 'BUT'), 0, 0);
       c.restore();
       if (t >= this.wNow.start) {
         const aN = prog(t, this.wNow.start, this.wNow.start + 0.03) * (1 - gone);
@@ -500,7 +502,7 @@ export default class SpacetimeScene extends Scene {
         c.translate(C.x, C.y); c.scale(slN, slN); c.translate(-C.x, -C.y);
         c.font = font(this.big, this.nowSize);
         c.fillStyle = heatCol(t - this.wNow.start, 0.97 * aN);
-        c.fillText('NOW', this.nowX0, this.nowBase);
+        c.fillText((RUSSIAN ? "НО" : 'NOW'), this.nowX0, this.nowBase);
         c.restore();
       }
       if (t >= this.wThe.start) {
@@ -508,7 +510,7 @@ export default class SpacetimeScene extends Scene {
         c.font = font(this.big, this.butSize);
         c.textAlign = 'right';
         c.fillStyle = heatCol(t - this.wThe.start, 0.96 * aT);
-        c.fillText('THE', this.nowX0 + this.nowLay.width, this.nowBase + this.butSize + 34);
+        c.fillText((RUSSIAN ? "" : 'THE'), this.nowX0 + this.nowLay.width, this.nowBase + this.butSize + 34);
         c.textAlign = 'left';
       }
       c.restore();

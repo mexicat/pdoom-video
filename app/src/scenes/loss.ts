@@ -1,3 +1,4 @@
+import { tr } from '../ru/strings';
 // FIG. 2 `loss` — "Training loss, suddenly".
 // A hairline log-scale chart draws in from black; the spark draws a noisy loss plateau while
 // the lyric rides the curve. On "drop" the curve falls off a grokking cliff, the camera falls
@@ -175,7 +176,7 @@ type Cam = { pos: P3; tgt: P3; roll: number; fov: number };
 
 function findWord(line: Line, q: string, from = 0): Word {
   const n = norm(q);
-  for (let i = from; i < line.words.length; i++) if (norm(line.words[i]!.w) === n) return line.words[i]!;
+  for (let i = from; i < line.words.length; i++) if (norm(line.words[i]!.source ?? line.words[i]!.w) === n) return line.words[i]!;
   throw new Error(`word not found: ${q}`);
 }
 /** Layout with extra space after word gaps. */
@@ -266,7 +267,7 @@ export default class LossScene extends Scene {
     this.tRoll = pick(this.tBoss, this.tAnd + 0.3, this.T1 - 0.5); // roll on "boss"
 
     // --- chart lyric layout ("There was a sudden")
-    const idxSudden = this.L1.words.findIndex((w) => norm(w.w) === 'sudden');
+    const idxSudden = this.L1.words.findIndex((w) => norm(w.source ?? w.w) === 'sudden');
     this.words1 = this.L1.words.slice(0, idxSudden + 1);
     this.lay1 = spacedLayout(this.words1.map((w) => w.w).join(' '), this.famLyric, SPACE_EM);
     const sc = TXT / 100;
@@ -314,7 +315,7 @@ export default class LossScene extends Scene {
       this.centerS.push(acc);
     }
     // canyon lyric ("in your training loss,")
-    const idxIn = this.L1.words.findIndex((w) => norm(w.w) === 'in');
+    const idxIn = this.L1.words.findIndex((w) => norm(w.source ?? w.w) === 'in');
     const w3 = this.L1.words.slice(idxIn);
     const lay3 = spacedLayout(w3.map((w) => w.w).join(' '), F.archivoItalic(100, 800), SPACE_EM);
     const sc3 = TXT3 / 100;
@@ -373,8 +374,8 @@ export default class LossScene extends Scene {
       found.push({ u, v });
     }
     found.sort((a, b) => a.v - b.v);
-    for (const m of found.slice(0, 4)) this.labels.push({ p: { x: this.xC + m.u, y: YR + terrH(m.u, m.v) + 0.05, z: -m.v }, ang: { x: 1, y: 0, z: 0 }, text: 'local min.', kind: 'min' });
-    this.labels.push({ p: { x: this.xC + UB, y: YR + BOWL0 - 0.2, z: -VB }, ang: { x: 1, y: 0, z: 0 }, text: 'sharp minimum', sub: '(generalizes poorly)', kind: 'pit' });
+    for (const m of found.slice(0, 4)) this.labels.push({ p: { x: this.xC + m.u, y: YR + terrH(m.u, m.v) + 0.05, z: -m.v }, ang: { x: 1, y: 0, z: 0 }, text: tr('local min.'), kind: 'min' });
+    this.labels.push({ p: { x: this.xC + UB, y: YR + BOWL0 - 0.2, z: -VB }, ang: { x: 1, y: 0, z: 0 }, text: tr('sharp minimum'), sub: tr('(generalizes poorly)'), kind: 'pit' });
   }
 
   // ---------------------------------------------------------------- helpers
@@ -775,7 +776,7 @@ export default class LossScene extends Scene {
         c.font = font(F.mono(500), fsz(p, 0.19));
         c.letterSpacing = '3px'; c.textAlign = 'right';
         c.fillStyle = rgba('bone', 0.75 * labA);
-        c.fillText('LOSS (LOG)', 0, 0);
+        c.fillText(tr('LOSS (LOG)'), 0, 0);
         c.restore();
       }
       const q = P(CW, -1.05);
@@ -783,7 +784,7 @@ export default class LossScene extends Scene {
         c.font = font(F.mono(500), fsz(q, 0.19));
         c.letterSpacing = '3px'; c.textAlign = 'right';
         c.fillStyle = rgba('bone', 0.75 * labA);
-        c.fillText('STEP →', q.x, q.y);
+        c.fillText(tr('STEP →'), q.x, q.y);
       }
       const r = P(0.3, yOfLog(1) + 0.55);
       if (r) {
@@ -859,7 +860,7 @@ export default class LossScene extends Scene {
         c.font = font(F.mono(400), fs);
         c.textAlign = 'left';
         c.fillStyle = rgba('bone', 0.9 * an);
-        c.fillText('grokking (?)', p.x, p.y);
+        c.fillText(tr('grokking (?)'), p.x, p.y);
         c.fillStyle = rgba('ash', 0.9 * an);
         c.fillText('\u2206loss −99.9999%', p.x, p.y + fs * 1.3); // U+2206 INCREMENT (Plex Mono has no Greek Δ)
       }

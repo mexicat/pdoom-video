@@ -1,3 +1,5 @@
+import { RUSSIAN } from '../edition';
+import { tr } from '../ru/strings';
 // "Scale, post-Chinchilla". The bridge, part 2, in three movements cut on the beat:
 //  1–2. "Post-Chinchilla, super-dense" / "Breaking through each safety fence": typographic
 //     pressure. The lyric is compressed kick by kick inside the broadcast title-safe area until it
@@ -45,7 +47,7 @@ export default class Dense extends Scene {
     this.pd = new PDoom(lyrics);
     this.press = new Press(audio, this.L1, this.L2, this.ctx.start, this.c2, this.c3);
     this.askew = new Askew(audio, this.L4, this.c4, this.ctx.end);
-    this.gpu = new GpuFloor(this.L3.words.map((x) => x.w.replace(/[^A-Za-z]/g, '').toUpperCase()));
+    this.gpu = new GpuFloor(this.L3.words.map((x) => x.w.replace(/[^\p{L}\s—]/gu, '').replace(/\s+/g, ' ').trim().toUpperCase()));
   }
 
   override render(f: Frame, out: THREE.WebGLRenderTarget) {
@@ -109,14 +111,14 @@ export default class Dense extends Scene {
     const val = t < wT.start ? Math.round(100 * ease.outCubic(prog(t, wH.start, wH.start + 0.25))) : Math.round(lerp(100, 100000, ease.outExpo(prog(t, wT.start, wT.start + 0.35))));
     c.save();
     c.translate(W / 2, H / 2); c.rotate(rollIn + 0.04 * settle); c.translate(-W / 2, -H / 2);
-    const pxX = 1335, pxY = 772;
+    const pxX = 1335, pxY = RUSSIAN ? 120 : 772;
     const ph = 178;
     c.fillStyle = rgba('ink', 0.9);
     c.fillRect(pxX, pxY, 380, ph);
     c.strokeStyle = rgba('bone', 0.35); c.lineWidth = 1; c.strokeRect(pxX + 0.5, pxY + 0.5, 380, ph);
     c.translate(pxX - 96, pxY - 88);
     c.font = font(F.mono(500), 14); c.letterSpacing = '3px'; c.fillStyle = rgba('bone', 0.6);
-    c.fillText('ACCELERATORS ONLINE', 116, 116);
+    c.fillText(tr('ACCELERATORS ONLINE'), 116, 116);
     c.letterSpacing = '0px';
     c.font = font(F.mono(500), 58); c.fillStyle = t >= wH.start ? rgba('bone', 0.95) : rgba('bone', 0.4);
     c.fillText(val.toLocaleString('en-US').padStart(7, ' '), 112, 178);
@@ -127,7 +129,7 @@ export default class Dense extends Scene {
     c.font = font(F.mono(500), 15); c.letterSpacing = '2px'; c.fillStyle = rgba('signal', 0.95);
     c.fillText(`P(DOOM) ${formatPDoom(this.pd.value(t))}`, 116, 250);
     c.letterSpacing = '0px'; c.font = font(F.mono(400), 13); c.fillStyle = rgba('bone', 0.45);
-    c.textAlign = 'right'; c.fillText('scaling as planned', 116 + 348, 250); c.textAlign = 'left';
+    c.textAlign = 'right'; c.fillText(tr('scaling as planned'), 116 + 348, 250); c.textAlign = 'left';
     c.restore();
     this.ctx.comp.draw(renderer, L.upload(), out);
     return { bloom: 0.55, vignette: 0.45, ca: 1.3 };
