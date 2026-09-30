@@ -10,7 +10,7 @@
 //   --scale N (all modes): render at N× the 1920x1080 layout (--scale 2 = true 3840x2160); stills are then saved
 //            full-res from the pixel buffer, videos are encoded at the physical size.
 // Uses the Vite dev server at --url (default http://localhost:5173); starts a private one if unreachable.
-import { chromium, type Page } from 'playwright-core';
+import { chromium, type Browser, type Page } from 'playwright-core';
 import { mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -58,8 +58,14 @@ async function openPage(url: string) {
     headless: !flag('headed'),
     args: [...(ANGLE ? [`--use-angle=${ANGLE}`] : []), '--enable-gpu-rasterization', '--ignore-gpu-blocklist', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows'],
   });
-  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   const logs: string[] = [];
+  const page = await bootPage(browser, url, logs);
+  return { browser, page, logs };
+}
+
+/** A fresh page of the app in export mode, booted and checked. */
+async function bootPage(browser: Browser, url: string, logs: string[]) {
+  const page = await browser.newPage({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 1 });
   page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') logs.push(`[${m.type()}] ${m.text()}`); });
   page.on('pageerror', (e) => logs.push(`[pageerror] ${e.message}`));
   const only = opt('only');
@@ -72,7 +78,28 @@ async function openPage(url: string) {
   if (size[0] !== OW || size[1] !== OH) throw new Error(`app renders ${size[0]}x${size[1]}, expected ${OW}x${OH} (--scale ${SCALE})`);
   const sceneErrors: string[] = await page.evaluate(() => (window as any).__pdoom.errors);
   if (sceneErrors.length) console.error('SCENE ERRORS:\n' + sceneErrors.join('\n'));
-  return { browser, page, logs };
+  return page;
+}
+
+/**
+ * After the page was lost mid-render: a reload boots the app again in export mode by itself, so wait for
+ * that same page to be ready; only a dead page (a renderer crash) is replaced. (Closing a page while it
+ * is reloading, then opening a new one, left Chrome with no page at all.)
+ */
+async function recoverPage(browser: Browser, url: string, logs: string[], old: Page): Promise<Page> {
+  for (let i = 0; i < 4 && !old.isClosed(); i++) {
+    try {
+      await old.waitForFunction(() => (window as any).__pdoom?.ready || (window as any).__pdoom?.error, null, { timeout: 30000 });
+      if (!(await old.evaluate(() => (window as any).__pdoom.error))) return old;
+      break;
+    } catch (e) {
+      // (the reload may still be replacing the document: poll again)
+      if (!/context was destroyed|navigat/i.test(String((e as Error)?.message ?? e))) break;
+      await Bun.sleep(500);
+    }
+  }
+  void old.close().catch(() => {});
+  return bootPage(browser, url, logs);
 }
 
 async function stills(page: Page, times: number[], outDir: string) {
@@ -112,7 +139,7 @@ async function sheet(page: Page, times: number[], cols: number, out: string) {
   await Bun.write(out, Buffer.from(dataUrl.split(',')[1]!, 'base64'));
 }
 
-async function video(page: Page, from: number, to: number, fps: number, out: string) {
+async function video(page: Page, from: number, to: number, fps: number, out: string, recover?: (lost: Page) => Promise<Page>) {
   mkdirSync(path.dirname(out), { recursive: true });
   const crf = opt('crf', '16')!;
   const audio = path.join(ROOT, 'audio/pdoom.mp3');
@@ -125,16 +152,17 @@ async function video(page: Page, from: number, to: number, fps: number, out: str
   let frames = 0;
   const total = Math.round(to * fps) - Math.round(from * fps);
   const t0 = performance.now();
-  const server = Bun.serve({
+  const server = Bun.serve<{ base: number }>({
     port: 0,
-    fetch(req, srv) { return srv.upgrade(req) ? undefined : new Response('ws only', { status: 400 }); },
+    // each connection (one per page, see the resume loop below) counts its acks from its own first frame
+    fetch(req, srv) { return srv.upgrade(req, { data: { base: frames } }) ? undefined : new Response('ws only', { status: 400 }); },
     websocket: {
       maxPayloadLength: Math.max(64 * 1024 * 1024, OW * OH * 4 + 1024),
       async message(ws, msg) {
         ff.stdin.write(msg as Uint8Array);
         await ff.stdin.flush();
         frames++;
-        ws.send(String(frames)); // ack: the page keeps at most a few frames ahead of ffmpeg (bounded memory at 4K)
+        ws.send(String(frames - ws.data.base)); // ack: the page keeps at most a few frames ahead of ffmpeg (bounded memory at 4K)
         if (frames % 60 === 0 || frames === total) {
           const el = (performance.now() - t0) / 1000;
           process.stdout.write(`\r${frames}/${total} frames  ${(frames / el).toFixed(1)} fps  eta ${((total - frames) / (frames / el)).toFixed(0)}s   `);
@@ -142,7 +170,23 @@ async function video(page: Page, from: number, to: number, fps: number, out: str
       },
     },
   });
-  const used: Record<string, number> = await page.evaluate((o) => (window as any).__pdoom.stream(o), { from, to, fps, ws: `ws://localhost:${server.port}`, samples: SAMPLES, shutter: +opt('shutter', '0.5')!, inflight: 4 });
+  // If the page is lost mid-render (a reload, a renderer crash), get a working page back (recoverPage)
+  // and continue from the first frame ffmpeg hasn't received, into the same encode. Every scene is a pure
+  // function of time, so the resumed frames are identical to the ones the lost page would have rendered.
+  const n0 = Math.round(from * fps);
+  const used: Record<string, number> = {};
+  for (let attempt = 0; ; attempt++) {
+    const resumeFrom = (n0 + frames) / fps;
+    try {
+      const u: Record<string, number> = await page.evaluate((o) => (window as any).__pdoom.stream(o), { from: resumeFrom, to, fps, ws: `ws://localhost:${server.port}`, samples: SAMPLES, shutter: +opt('shutter', '0.5')!, inflight: 4 });
+      for (const [k, v] of Object.entries(u)) used[k] = (used[k] ?? 0) + v;
+      break;
+    } catch (e) {
+      if (!recover || attempt >= 5 || frames >= total) throw e;
+      console.error(`\npage lost at frame ${frames}/${total} (${String((e as Error)?.message ?? e).split('\n')[0]}); recovering it and resuming`);
+      page = await recover(page);
+    }
+  }
   // wait for all frames to arrive
   while (frames < total) await Bun.sleep(20);
   ff.stdin.end();
@@ -201,7 +245,7 @@ try {
       const ms: number[] = [];
       const buf = new Uint8Array(P.width * P.height * 4);
       P.still(from);
-      const used: Record<number, number> = {};
+      const used: Record<string, number> = {};
       for (let t = from; t < to; t += 1 / 60) {
         const a = performance.now();
         const k = P.engine.render(t, 1 / 60, false, samples, shutter);
@@ -215,7 +259,7 @@ try {
     console.log(`frames ${r.n}  avg ${r.avg.toFixed(1)}ms  p50 ${r.p50.toFixed(1)}  p95 ${r.p95.toFixed(1)}  max ${r.max.toFixed(1)}  sub-frames ${hist(r.used)}`);
   } else if (mode === 'video') {
     const dur: number = await page.evaluate(() => (window as any).__pdoom.duration);
-    await video(page, +opt('from', '0')!, +opt('to', String(dur))!, +opt('fps', '60')!, path.resolve(opt('out', path.join(ROOT, 'out/pdoom.mp4'))!));
+    await video(page, +opt('from', '0')!, +opt('to', String(dur))!, +opt('fps', '60')!, path.resolve(opt('out', path.join(ROOT, 'out/pdoom.mp4'))!), (lost) => recoverPage(browser, url, logs, lost));
   }
   if (logs.length) console.error('BROWSER LOG:\n' + logs.slice(0, 40).join('\n'));
 } finally {

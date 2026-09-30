@@ -23,8 +23,14 @@ export default defineConfig({
   root: '.',
   publicDir: 'public',
   plugins: [rootAssets(['audio', 'data'])],
-  // PDOOM_NO_HMR=1: no live reload (export renders must not reload mid-run when a file changes)
-  server: { port: 5173, strictPort: false, hmr: process.env.PDOOM_NO_HMR ? false : undefined, fs: { allow: [ROOT] } },
+  // PDOOM_NO_HMR=1: no live reload (export renders must not reload mid-run when a file changes). It also
+  // turns the websocket off: with only hmr off, Vite still connects one, and if it ever drops, the client
+  // polls for the server and reloads the page, which kills a long export (it did, 38 minutes into one).
+  server: {
+    port: 5173, strictPort: false, fs: { allow: [ROOT] },
+    hmr: process.env.PDOOM_NO_HMR ? false : undefined,
+    ws: process.env.PDOOM_NO_HMR ? false : undefined,
+  },
   resolve: { alias: { '@root': ROOT } },
   build: { target: 'esnext', assetsInlineLimit: 0 },
 });
