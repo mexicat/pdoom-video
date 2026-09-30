@@ -1,20 +1,28 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, normalizePath, type Plugin } from 'vite';
+import { cpSync } from 'node:fs';
 import path from 'node:path';
 
-const ROOT = path.resolve(import.meta.dirname, '..');
+const repoRoot = path.resolve(import.meta.dirname, '..');
+const assetDirs = ['audio', 'data'];
 
-// The repo root holds audio/ and data/; serve them next to the app. public/audio and public/data are
-// git symlinks, which a Windows checkout turns into plain text files, so route the URLs to the repo
-// root through Vite's /@fs/ file server instead (it handles Range requests, which <audio> seeking needs).
-function rootAssets(dirs: string[]): Plugin {
-  const fsRoot = `/@fs/${ROOT.replace(/\\/g, '/').replace(/^\//, '')}`;
+// Git can check out directory symlinks as plain files on Windows. Serve the
+// original assets through Vite and copy them into builds without using symlinks.
+function repoAssets(): Plugin {
   return {
-    name: 'root-assets',
+    name: 'repo-assets',
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
-        if (req.url && dirs.some((d) => req.url!.startsWith(`/${d}/`))) req.url = fsRoot + req.url;
+        if (assetDirs.some((dir) => req.url?.startsWith(`/${dir}/`))) {
+          req.url = `/@fs/${encodeURI(normalizePath(repoRoot))}${req.url}`;
+        }
         next();
       });
+    },
+    writeBundle(options) {
+      if (!options.dir) return;
+      for (const dir of assetDirs) {
+        cpSync(path.join(repoRoot, dir), path.join(options.dir, dir), { recursive: true });
+      }
     },
   };
 }
@@ -22,15 +30,15 @@ function rootAssets(dirs: string[]): Plugin {
 export default defineConfig({
   root: '.',
   publicDir: 'public',
-  plugins: [rootAssets(['audio', 'data'])],
+  plugins: [repoAssets()],
   // PDOOM_NO_HMR=1: no live reload (export renders must not reload mid-run when a file changes). It also
   // turns the websocket off: with only hmr off, Vite still connects one, and if it ever drops, the client
   // polls for the server and reloads the page, which kills a long export (it did, 38 minutes into one).
   server: {
-    port: 5173, strictPort: false, fs: { allow: [ROOT] },
+    port: 5173, strictPort: false, fs: { allow: [repoRoot] },
     hmr: process.env.PDOOM_NO_HMR ? false : undefined,
     ws: process.env.PDOOM_NO_HMR ? false : undefined,
   },
-  resolve: { alias: { '@root': ROOT } },
+  resolve: { alias: { '@root': repoRoot } },
   build: { target: 'esnext', assetsInlineLimit: 0 },
 });
