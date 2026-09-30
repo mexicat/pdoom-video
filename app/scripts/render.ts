@@ -178,7 +178,9 @@ async function video(page: Page, from: number, to: number, fps: number, out: str
   for (let attempt = 0; ; attempt++) {
     const resumeFrom = (n0 + frames) / fps;
     try {
-      const u: Record<string, number> = await page.evaluate((o) => (window as any).__pdoom.stream(o), { from: resumeFrom, to, fps, ws: `ws://localhost:${server.port}`, samples: SAMPLES, shutter: +opt('shutter', '0.5')!, inflight: 4 });
+      // (a crashed renderer doesn't always reject a pending evaluate: race it against the page's crash/close)
+      const lost = new Promise<never>((_, rej) => { page.once('crash', () => rej(new Error('page crashed'))); page.once('close', () => rej(new Error('page closed'))); });
+      const u: Record<string, number> = await Promise.race([page.evaluate((o) => (window as any).__pdoom.stream(o), { from: resumeFrom, to, fps, ws: `ws://localhost:${server.port}`, samples: SAMPLES, shutter: +opt('shutter', '0.5')!, inflight: 4 }), lost]);
       for (const [k, v] of Object.entries(u)) used[k] = (used[k] ?? 0) + v;
       break;
     } catch (e) {
