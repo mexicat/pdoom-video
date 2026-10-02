@@ -216,9 +216,17 @@ float elineLod(float u, float w, float px) {
 vec4 fetch0(ivec2 c) { return texelFetch(g0Tex, clamp(c, ivec2(0), ivec2(gRes) - 1), 0); }
 vec4 fetch1(ivec2 c) { return texelFetch(g1Tex, clamp(c, ivec2(0), ivec2(gRes) - 1), 0); }
 
+// a2 wraps from +pi to -pi along one radial of the iris (3 o'clock for an eye looking at the camera). The fibres
+// are periodic in it, so the pattern itself is seamless there, but fwidth() sees the wrap as a huge gradient and
+// hatch() would smear the fibres into a flat band along that radial. So the derivative is measured on whichever
+// of a2 and a copy wrapped at 0 is continuous in this pixel's quad: the two give fibre coordinates that differ by
+// whole periods, so only the anti-aliasing width changes, nothing else.
 float irisPattern(float a2, float rr, float seed) {
-  float fib = hatch(a2 * 64.0 / TAU + 0.35 * sin(rr * 21.0 + seed), 0.45 + 0.35 * sin(a2 * 7.0 + seed));
-  float fib2 = hatch(a2 * 23.0 / TAU + 0.5 * rr, 0.25);
+  float a2b = a2 + (a2 < 0.0 ? TAU : 0.0);
+  float u1 = a2 * 64.0 / TAU + 0.35 * sin(rr * 21.0 + seed), u1b = a2b * 64.0 / TAU + 0.35 * sin(rr * 21.0 + seed);
+  float u2 = a2 * 23.0 / TAU + 0.5 * rr, u2b = a2b * 23.0 / TAU + 0.5 * rr;
+  float fib = hatchD(u1, 0.45 + 0.35 * sin(a2 * 7.0 + seed), min(fwidth(u1), fwidth(u1b)));
+  float fib2 = hatchD(u2, 0.25, min(fwidth(u2), fwidth(u2b)));
   return max(fib, fib2 * 0.6);
 }
 

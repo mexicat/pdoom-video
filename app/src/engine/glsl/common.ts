@@ -134,14 +134,16 @@ ${SCALE === 1 ? `float aaStroke(float d, float wd) { float w = fwidth(d); return
  * each line's width grows with darkness (0 = paper, 1 = full ink). Returns ink coverage 0..1.
  * Works in any space: u can be screen, world, or surface-param based. Anti-aliased via fwidth.
  */
-float hatch(float u, float darkness) {
+/** hatch() with the derivative of u supplied by the caller: for a coordinate whose fwidth() lies, e.g. an angle that wraps. */
+float hatchD(float u, float darkness, float du) {
   float f = abs(fract(u) - 0.5);            // 0 at line centre ... 0.5 between lines
   float half_w = 0.5 * sat(darkness);       // half line width in u-units
-  float aa = max(fwidth(u), 1e-4);
+  float aa = max(du, 1e-4);
 ${SCALE === 1 ? `  return 1.0 - smoothstep(half_w - aa, half_w + aa, 0.5 - f);` : `  // keep the ink the 1x footprint puts down per period; draw it with the sharper physical footprint
   float aaL = aa * PX_SCALE, x = 0.5 - f, m = _inkHalfWidth(half_w - aaL, half_w + aaL, 0.5);
   return min(_boxLine(x, m, aa) + _boxLine(1.0 - x, m, aa), 1.0);`}
 }
+float hatch(float u, float darkness) { return hatchD(u, darkness, fwidth(u)); }
 /** Engraving with a thin always-on hairline + crosshatch in deep shadows. */
 float engrave(vec2 uv, float darkness, float freq, float angle) {
   vec2 r = rot2(angle) * uv * freq;
