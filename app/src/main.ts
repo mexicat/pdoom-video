@@ -159,6 +159,23 @@ function setupPlayer() {
   scrub.step = '0.001';
   if (engine.errors.length) { errs.textContent = engine.errors.join('\n\n'); errs.style.display = 'block'; }
 
+  // Bookmarked scenes mirror the `only` URL param
+  const bookmarked = new Set(ONLY ? ONLY.split(',') : []);
+  const marksById = new Map<string, HTMLElement>();
+  const syncBookmarks = () => {
+    for (const [id, m] of marksById) m.classList.toggle('bookmarked', bookmarked.has(id));
+    const url = new URL(location.href);
+    const picked = TIMELINE.filter((x) => bookmarked.has(x.id));
+    if (picked.length) {
+      url.searchParams.set('only', picked.map((x) => x.id).join(','));
+      url.searchParams.set('t', String(Math.min(...picked.map((x) => x.start))));
+    } else {
+      url.searchParams.delete('only');
+    }
+    history.replaceState(null, '', url);
+  };
+
+  
   for (const e of TIMELINE) {
     const m = document.createElement('div');
     m.className = 'mark';
@@ -166,9 +183,17 @@ function setupPlayer() {
     m.style.width = `${((e.end - e.start) / engine.duration) * 100}%`;
     m.title = `${e.id} ${e.start.toFixed(2)}–${e.end.toFixed(2)}`;
     m.textContent = e.id;
-    m.onclick = () => seek(e.start);
+    m.onclick = () => {
+      // already parked at this scene's start and not playing: second click toggles the bookmark
+      if (!playing && Math.abs(t - e.start) < 0.01) {
+        if (!bookmarked.delete(e.id)) bookmarked.add(e.id);
+        syncBookmarks();
+      } else seek(e.start);
+    };
+    marksById.set(e.id, m);
     marks.appendChild(m);
   }
+  syncBookmarks();
 
   let t = FROM ?? 0;
   let playing = false;
